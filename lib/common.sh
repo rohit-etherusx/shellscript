@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
 # Shellscape — shared helpers. Sourced by install.sh, uninstall.sh and every
-# module in modules/. Ported from Arch-Hyprland/install-scripts/Global_functions.sh
-# (pacman/yay → dnf, copy → symlink).
+# module in modules/: logging, dnf, backup+symlink, git clone, download, vendor.
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -134,18 +133,20 @@ link_dotfile() {
   grep -qxF "$dst" "$LINKS_LIST" 2>/dev/null || echo "$dst" >>"$LINKS_LIST"
 }
 
-# vendor_extract <name> <dest-dir>  → unpacks vendor/<name>.tar.gz (single top-level
-# dir) into <dest-dir>. Returns 1 (quietly) when there is no vendored copy.
+# vendor_extract <name> <dest-dir>  → unpacks vendor/<name>.tar.xz (or .tar.gz;
+# single top-level dir) into <dest-dir>. Returns 1 (quietly) when there is no
+# vendored copy. tar picks the decompressor from the file itself.
 vendor_extract() {
-  local name=$1 dest=$2 tb="$VENDOR_DIR/$1.tar.gz"
+  local name=$1 dest=$2 tb
+  for tb in "$VENDOR_DIR/$name.tar.xz" "$VENDOR_DIR/$name.tar.gz"; do [[ -s "$tb" ]] && break; done
   [[ -s "$tb" ]] || return 1
   mkdir -p "$dest"
-  run_logged "Unpacking vendored ${YELLOW}$name${RESET}" tar -xzf "$tb" -C "$dest" --strip-components=1 \
+  run_logged "Unpacking vendored ${YELLOW}$name${RESET}" tar -xf "$tb" -C "$dest" --strip-components=1 \
     && ok "Installed $name from vendor/"
 }
 
 # git_clone <url> <dir> [extra git-clone args]  → skip if present; use
-# vendor/<repo-name>.tar.gz when it exists; otherwise shallow clone.
+# vendor/<repo-name>.tar.xz when it exists; otherwise shallow clone.
 git_clone() {
   local url=$1 dir=$2; shift 2
   if [[ -d "$dir/.git" || -n "$(ls -A "$dir" 2>/dev/null)" ]]; then

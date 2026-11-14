@@ -127,7 +127,7 @@ cat <<WALK
 
 ${BOLD}Next steps${RESET}
   1. Log out and back in (or run ${CYAN}exec zsh${RESET}) so zsh becomes your shell.
-  2. Open ${CYAN}kitty${RESET} — the agnosterzak prompt needs the Nerd Font kitty is configured with.
+  2. Open ${CYAN}kitty${RESET} — the prompt needs the Nerd Font kitty is configured with.
   3. Try:  ${CYAN}ls${RESET} (eza icons)  ${CYAN}Ctrl-R${RESET} (fzf history)  ${CYAN}z <dir>${RESET} (zoxide)
            ${CYAN}fastfetch${RESET}  ${CYAN}pokemon-colorscripts -r${RESET}  ${CYAN}tmux${RESET} (prefix is Ctrl-a; prefix+I installs plugins)
   4. Edit configs in ${CYAN}$SHELLSCAPE_DIR/config/${RESET} — they are symlinked, changes apply immediately.

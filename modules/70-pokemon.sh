@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # desc: Pokemon colorscripts — random sprite next to fastfetch on shell start (optional eye-candy)
 source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
-# Mirrors Arch-Hyprland/install-scripts/zsh_pokemon.sh (AUR → build from GitLab source)
+# No Fedora package exists, so it is built from the GitLab source (or vendor/).
 
 install_pkgs python3
 

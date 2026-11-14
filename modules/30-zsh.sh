@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # desc: Zsh — zsh + Oh-My-Zsh + autosuggestions/syntax-highlighting + shellscape/agnosterzak themes, set as default shell
 source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
-# Mirrors Arch-Hyprland/install-scripts/zsh.sh
 
 install_pkgs zsh zsh-autosuggestions zsh-syntax-highlighting
 
@@ -26,12 +25,12 @@ else
     && ok "Oh-My-Zsh installed" || die "Oh-My-Zsh install failed"
 fi
 
-# 3. Plugins (same two the Arch repo clones)
+# 3. Plugins
 mkdir -p "$ZSH_CUSTOM/plugins" "$ZSH_CUSTOM/themes"
 git_clone https://github.com/zsh-users/zsh-autosuggestions     "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 git_clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 
-# 4. Extra themes from Arch-Hyprland/assets/add_zsh_theme (agnosterzak is the default)
+# 4. Bundled prompt themes (shellscape is the default; see config/zsh/themes)
 cp -f "$ZSH_SRC"/themes/*.zsh-theme "$ZSH_CUSTOM/themes/"
 ok "Installed $(ls "$ZSH_SRC"/themes/*.zsh-theme | wc -l) themes → $ZSH_CUSTOM/themes"
 

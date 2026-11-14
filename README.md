@@ -1,13 +1,14 @@
 # Shellscape
 
-One-command terminal ricing for **Fedora KDE** (built and tested on Fedora 43,
-Plasma 6.7). It ports the terminal half of
-[JaKooLit's Arch-Hyprland](https://github.com/JaKooLit/Arch-Hyprland) from
-`pacman`/AUR to `dnf`, themes everything in **Catppuccin Mocha**, and keeps every
-config file inside this folder so you can version, edit and move it as one unit.
+One-command terminal ricing for **Fedora KDE**. Built and tested on Fedora 43
+with Plasma 6.7. Everything is themed in **Catppuccin Mocha**, every config file
+lives inside this folder, and the installer is a set of small idempotent modules
+you can run, skip or re-run individually.
+
+![Shellscape on Fedora KDE: Pokémon sprite, fastfetch and the shellscape prompt in Ptyxis](docs/screenshot.png)
 
 ```bash
-git clone <this repo> ~/projects/linux-ricing/Shellscape
+git clone git@github.com:rohit-etherusx/shellscript.git ~/projects/linux-ricing/Shellscape
 cd ~/projects/linux-ricing/Shellscape
 ./install.sh
 ```
@@ -37,8 +38,10 @@ changes the live config immediately.
 ## Requirements
 
 - Fedora (the preflight module refuses anything else) with `sudo` access.
-- Internet for the first run (dnf packages, Nerd Font, Oh-My-Zsh, plugins), or a
-  populated `vendor/` folder for everything except dnf. See [Offline installs](#offline-installs).
+- Internet for dnf. Everything that is *not* a Fedora package (Nerd Font,
+  Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts) ships compressed in
+  `vendor/`, so the installer never needs GitHub or GitLab. See
+  [Offline installs](#offline-installs).
 - KDE Plasma for the kitty default-terminal, Ptyxis and desktop-effects modules.
   They skip themselves cleanly on other desktops.
 
@@ -54,7 +57,7 @@ changes the live config immediately.
 ./install.sh --skip pokemon --skip kde-effects
 ./uninstall.sh                   # remove symlinks, restore backups, offer to reset the shell
 ./uninstall.sh --purge           # also remove Oh-My-Zsh, TPM, the Nerd Font, pokemon-colorscripts and the dnf packages
-./vendor.sh                      # snapshot every non-dnf download into vendor/ for offline installs
+./vendor.sh                      # refresh the compressed copies in vendor/ from the current install
 ```
 
 Re-running `./install.sh` is always safe. Every module checks what is already
@@ -67,15 +70,15 @@ Modules live in `modules/NN-name.sh` and run in numeric order.
 
 | Module | What it does |
 |---|---|
-| `00-preflight` | Verifies Fedora, non-root, sudo and internet. Installs git, curl, unzip, tar. Creates `~/.config`, `~/.local/bin`, `~/.local/share/fonts`. |
-| `10-fonts` | Fedora font packages plus JetBrainsMono Nerd Font into `~/.local/share/fonts/JetBrainsMonoNerdFont/`. |
+| `00-preflight` | Verifies Fedora, non-root, sudo and internet. Installs git, curl, unzip, tar, xz. Creates `~/.config`, `~/.local/bin`, `~/.local/share/fonts`. |
+| `10-fonts` | Fedora font packages, then unpacks the vendored JetBrainsMono Nerd Font into `~/.local/share/fonts/JetBrainsMonoNerdFont/` (downloads the release zip only if `vendor/` is missing). |
 | `20-cli-tools` | eza, bat, fzf, zoxide, ripgrep, fd. Links the eza and bat Catppuccin themes. |
 | `30-zsh` | zsh, Oh-My-Zsh (unattended, keeps our `.zshrc`), autosuggestions and syntax-highlighting plugins, bundled prompt themes. Offers to make zsh the login shell. |
 | `40-kitty` | kitty plus config. Makes kitty KDE's default terminal, moves `Ctrl+Alt+T` from Konsole to kitty, writes `~/.config/xdg-terminals.list`. |
 | `45-ptyxis` | Points Ptyxis at the Nerd Font, the built-in "Catppuccin Mocha" palette and a blinking beam cursor. Skips if Ptyxis is absent. |
 | `50-fastfetch` | fastfetch and chafa, links the four fastfetch layouts and the Fedora logo. |
-| `60-tmux` | tmux and config, clones TPM and installs its plugins. |
-| `70-pokemon` | Builds pokemon-colorscripts from GitLab into `/opt` and switches the startup banner to the Pokémon layout. |
+| `60-tmux` | tmux and config, installs TPM and its plugins. |
+| `70-pokemon` | Installs pokemon-colorscripts into `/opt` and switches the startup banner to the Pokémon layout. |
 | `80-kde-effects` | Enables the KWin effects listed above, bumps blur strength, sets Ptyxis to 92 % opacity, and reloads KWin live over D-Bus. Asks first. |
 
 ---
@@ -86,8 +89,9 @@ Modules live in `modules/NN-name.sh` and run in numeric order.
 Shellscape/
 ├── install.sh          entry point: runs modules/ in order, prints a summary
 ├── uninstall.sh        removes symlinks, restores backups (--purge removes packages too)
-├── vendor.sh           snapshots non-dnf downloads into vendor/ for offline installs
+├── vendor.sh           repacks every non-dnf dependency into vendor/ (xz-compressed)
 ├── PACKAGES.md         every dependency and where it comes from
+├── docs/               screenshot
 ├── lib/common.sh       shared helpers: logging, dnf, backup+symlink, git clone, download, vendor
 ├── modules/            one self-contained, idempotent step each (NN-name.sh)
 ├── config/             the source of truth, symlinked into ~
@@ -97,7 +101,7 @@ Shellscape/
 │   ├── tmux/           tmux.conf  plugins/ (populated by TPM at install time)
 │   ├── eza/            theme.yml
 │   └── bat/            config
-├── vendor/             offline copies: Nerd Font zip, Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts
+├── vendor/             compressed copies: Nerd Font, Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts (~16 MB)
 ├── logs/               install logs, links.list, backups.list      (gitignored)
 └── build/              downloaded zips and cloned sources           (gitignored)
 ```
@@ -134,8 +138,8 @@ colours defined in one map at the top of the file. It shows a red ✘ when the l
 command failed, ⚡ as root, ⚙ with background jobs, and a git segment that goes
 green (clean), yellow (untracked) or red (modified/deleted) with ahead/behind counts.
 
-Other bundled themes from Arch-Hyprland: `agnosterzak antares bullet-train
-color-input comfyline emoji fishbone++`, plus everything Oh-My-Zsh ships.
+Other bundled themes: `agnosterzak antares bullet-train color-input comfyline
+emoji fishbone++`, plus everything Oh-My-Zsh ships.
 
 ### Startup banner
 
@@ -148,7 +152,8 @@ SHELLSCAPE_BANNER_DELAY=3       # hundredths of a second between lines
 ```
 
 fastfetch layouts are in `config/fastfetch/`. `config-pokemon.jsonc` is the one
-used next to the sprite; `config-compact.jsonc` is used for the plain banner.
+used next to the sprite (as in the screenshot above); `config-compact.jsonc` is
+used for the plain banner.
 
 ### Colours
 
@@ -211,11 +216,23 @@ tracked.
 
 ## Offline installs
 
-`./vendor.sh`, run on a machine where the installer has already completed, packs
-every non-dnf dependency into `vendor/` (around 140 MB): the Nerd Font zip,
-Oh-My-Zsh, both zsh plugins, TPM and pokemon-colorscripts. `install.sh` prefers
-those copies automatically and only downloads what is missing, so on a new
-machine the only network access needed is Fedora's own package repos.
+`vendor/` holds an xz-compressed copy of every dependency that is not a Fedora
+package, and it is committed to the repo:
+
+| Archive | Contents | Size |
+|---|---|---|
+| `JetBrainsMono.tar.xz` | all 96 Nerd Font TTFs (233 MB unpacked) | ~6 MB |
+| `oh-my-zsh.tar.xz` | Oh-My-Zsh without `.git` | ~3 MB |
+| `pokemon-colorscripts.tar.xz` | sprites and installer | ~5 MB |
+| `zsh-autosuggestions.tar.xz` `zsh-syntax-highlighting.tar.xz` `tpm.tar.xz` | plugins | < 1 MB |
+
+`install.sh` always prefers these and unpacks them straight into place; it only
+reaches out to GitHub or GitLab when an archive is missing. So on a fresh machine
+the only network access needed is Fedora's own package repos.
+
+`./vendor.sh` rebuilds the archives from a machine where the installer has
+already completed (the Nerd Font is re-packed from the downloaded release zip in
+`build/`). Run it after updating a plugin or the font to refresh the repo copy.
 
 Copy the whole folder anywhere (git, rsync, USB) and run `./install.sh`. The
 symlinks are absolute, so the folder can live at any path. If you move it
@@ -285,8 +302,8 @@ nothing to do.
 
 ## Credits
 
-- Install flow, prompt themes and fastfetch layouts:
-  [JaKooLit/Arch-Hyprland](https://github.com/JaKooLit/Arch-Hyprland)
 - Colours: [Catppuccin Mocha](https://github.com/catppuccin)
 - Sprites: [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
 - Font: [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) build of JetBrains Mono
+- Shell framework: [Oh-My-Zsh](https://ohmyz.sh) and the
+  [zsh-users](https://github.com/zsh-users) plugins

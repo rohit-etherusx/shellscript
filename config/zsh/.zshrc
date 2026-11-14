@@ -1,6 +1,6 @@
 # ──────────────────────────────────────────────────────────────────────────────
 #  Shellscape ~/.zshrc  (symlinked from Shellscape/config/zsh/.zshrc)
-#  Based on Arch-Hyprland/assets/.zshrc — Fedora edition
+#  Fedora KDE edition
 # ──────────────────────────────────────────────────────────────────────────────
 
 # Where Shellscape lives (resolved through the symlink) — handy for `shellscape` alias
@@ -17,7 +17,7 @@ export PATH
 export ZSH="$HOME/.oh-my-zsh"
 
 # shellscape = agnosterzak layout with rounded pill segments + Catppuccin colours.
-# Others available (from Arch-Hyprland): agnosterzak antares bullet-train
+# Other bundled themes: agnosterzak antares bullet-train
 # color-input comfyline emoji fishbone++  — plus every built-in OMZ theme.
 ZSH_THEME="shellscape"
 

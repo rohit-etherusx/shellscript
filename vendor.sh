@@ -17,20 +17,31 @@ export LOG
 source "$SHELLSCAPE_DIR/lib/common.sh"
 mkdir -p "$VENDOR_DIR"
 
-# pack <name> <source-dir> [tar --exclude=... ]  → vendor/<name>.tar.gz (no .git)
+# pack <name> <source-dir> [tar --exclude=... ]  → vendor/<name>.tar.xz (no .git)
 pack() {
   local name=$1 src=$2; shift 2
   if [[ ! -d "$src" ]]; then warn "$name: $src not found (run ./install.sh first) — skipped"; return 0; fi
   run_logged "Packing ${YELLOW}$name${RESET}" \
-    tar -czf "$VENDOR_DIR/$name.tar.gz" -C "$(dirname "$src")" --exclude=.git "$@" "$(basename "$src")" \
-    && ok "vendor/$name.tar.gz  ($(du -h "$VENDOR_DIR/$name.tar.gz" | cut -f1))"
+    tar -cJf "$VENDOR_DIR/$name.tar.xz" -C "$(dirname "$src")" --exclude=.git "$@" "$(basename "$src")" \
+    && rm -f "$VENDOR_DIR/$name.tar.gz" \
+    && ok "vendor/$name.tar.xz  ($(du -h "$VENDOR_DIR/$name.tar.xz" | cut -f1))"
 }
 
 section "Nerd Font"
-if [[ -s "$BUILD_DIR/JetBrainsMono.zip" ]]; then
-  cp -u "$BUILD_DIR/JetBrainsMono.zip" "$VENDOR_DIR/" && ok "vendor/JetBrainsMono.zip"
+# The release zip is ~130 MB (too big for GitHub). The 96 TTFs share almost all
+# of their glyph data, so a solid xz archive of the same files is ~6 MB.
+NF_ZIP="$BUILD_DIR/JetBrainsMono.zip"
+NF_TXZ="$VENDOR_DIR/JetBrainsMono.tar.xz"
+if [[ -s "$NF_TXZ" && ( ! -s "$NF_ZIP" || "$NF_TXZ" -nt "$NF_ZIP" ) ]]; then
+  ok "vendor/JetBrainsMono.tar.xz is up to date ($(du -h "$NF_TXZ" | cut -f1))"
 else
-  download "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip" "$VENDOR_DIR/JetBrainsMono.zip"
+  [[ -s "$NF_ZIP" ]] || download "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip" "$NF_ZIP"
+  NF_TMP="$(mktemp -d)"
+  run_logged "Repacking ${YELLOW}JetBrainsMono Nerd Font${RESET} as tar.xz (takes a minute)" \
+    bash -c 'unzip -q -o "$1" -d "$3" -x "README*" && tar -cf - -C "$3" . | xz -9 -T0 > "$2"' _ "$NF_ZIP" "$NF_TXZ" "$NF_TMP" \
+    && ok "vendor/JetBrainsMono.tar.xz  ($(du -h "$NF_TXZ" | cut -f1))" \
+    || die "Font repack failed"
+  rm -rf "$NF_TMP"
 fi
 
 section "Oh-My-Zsh + plugins"

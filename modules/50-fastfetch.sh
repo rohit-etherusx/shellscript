@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# desc: Fastfetch — system info banner with Fedora logo (configs ported from Arch-Hyprland)
+# desc: Fastfetch — system info banner with the Fedora logo (four bundled layouts)
 source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
 
 install_pkgs fastfetch chafa   # chafa = image fallback for terminals without the kitty graphics protocol

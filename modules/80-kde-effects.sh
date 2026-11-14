@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # desc: KDE effects — window animations (glide, wobbly, magic lamp), blur + translucency for terminals
 source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
-# Plasma's counterpart to the Hyprland animations/blur in Arch-Hyprland.
+# Gives Plasma the same "alive" feel as a tiling-WM rice: animations + blur.
 
 if ! need_cmd kwriteconfig6; then
   info "kwriteconfig6 not found (not KDE Plasma?). Skipping..."

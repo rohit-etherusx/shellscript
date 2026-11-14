@@ -1,6 +1,6 @@
 # Shellscape aliases — sourced from .zshrc
 
-# eza (replaces the lsd aliases from Arch-Hyprland)
+# eza (modern ls)
 if (( $+commands[eza] )); then
   alias ls='eza --icons=auto --group-directories-first'
   alias l='eza -l --icons=auto --group-directories-first --git'

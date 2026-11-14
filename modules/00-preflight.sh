@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# desc: Preflight — checks Fedora/sudo/internet, installs git curl unzip, creates dirs
+# desc: Preflight — checks Fedora/sudo/internet, installs git curl unzip tar xz, creates dirs
 source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
 
 # Fedora?
@@ -18,7 +18,7 @@ else
 fi
 
 # Base tools every later module needs
-install_pkgs git curl unzip tar
+install_pkgs git curl unzip tar xz
 
 # Directories
 mkdir -p "$HOME/.config" "$HOME/.local/share/fonts" "$HOME/.local/bin"
