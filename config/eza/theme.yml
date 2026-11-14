@@ -1,0 +1,95 @@
+# Shellscape — eza theme, Catppuccin Mocha (~/.config/eza/theme.yml)
+colourful: true
+
+filekinds:
+  normal:        { foreground: "#cdd6f4" }
+  directory:     { foreground: "#89b4fa", is_bold: true }
+  symlink:       { foreground: "#f5c2e7" }
+  pipe:          { foreground: "#9399b2" }
+  block_device:  { foreground: "#f38ba8" }
+  char_device:   { foreground: "#f38ba8" }
+  socket:        { foreground: "#585b70" }
+  special:       { foreground: "#cba6f7" }
+  executable:    { foreground: "#a6e3a1", is_bold: true }
+  mount_point:   { foreground: "#74c7ec" }
+
+perms:
+  user_read:          { foreground: "#cdd6f4" }
+  user_write:         { foreground: "#f9e2af" }
+  user_execute_file:  { foreground: "#a6e3a1" }
+  user_execute_other: { foreground: "#a6e3a1" }
+  group_read:         { foreground: "#a6adc8" }
+  group_write:        { foreground: "#f9e2af" }
+  group_execute:      { foreground: "#a6e3a1" }
+  other_read:         { foreground: "#7f849c" }
+  other_write:        { foreground: "#f9e2af" }
+  other_execute:      { foreground: "#a6e3a1" }
+  special_user_file:  { foreground: "#cba6f7" }
+  special_other:      { foreground: "#585b70" }
+  attribute:          { foreground: "#a6adc8" }
+
+size:
+  major:       { foreground: "#a6adc8" }
+  minor:       { foreground: "#89dceb" }
+  number_byte: { foreground: "#cdd6f4" }
+  number_kilo: { foreground: "#cdd6f4" }
+  number_mega: { foreground: "#89b4fa" }
+  number_giga: { foreground: "#cba6f7" }
+  number_huge: { foreground: "#cba6f7" }
+  unit_byte:   { foreground: "#a6adc8" }
+  unit_kilo:   { foreground: "#89b4fa" }
+  unit_mega:   { foreground: "#89b4fa" }
+  unit_giga:   { foreground: "#cba6f7" }
+  unit_huge:   { foreground: "#cba6f7" }
+
+users:
+  user_you:    { foreground: "#f9e2af", is_bold: true }
+  user_root:   { foreground: "#f38ba8" }
+  user_other:  { foreground: "#cba6f7" }
+  group_yours: { foreground: "#f9e2af" }
+  group_other: { foreground: "#7f849c" }
+  group_root:  { foreground: "#f38ba8" }
+
+links:
+  normal:          { foreground: "#f5c2e7" }
+  multi_link_file: { foreground: "#f5c2e7", is_bold: true }
+
+git:
+  new:        { foreground: "#a6e3a1" }
+  modified:   { foreground: "#f9e2af" }
+  deleted:    { foreground: "#f38ba8" }
+  renamed:    { foreground: "#94e2d5" }
+  typechange: { foreground: "#f5c2e7" }
+  ignored:    { foreground: "#585b70" }
+  conflicted: { foreground: "#f38ba8", is_bold: true }
+
+git_repo:
+  branch_main:  { foreground: "#cdd6f4" }
+  branch_other: { foreground: "#cba6f7" }
+  git_clean:    { foreground: "#a6e3a1" }
+  git_dirty:    { foreground: "#f38ba8" }
+
+file_type:
+  image:      { foreground: "#cba6f7" }
+  video:      { foreground: "#fab387" }
+  music:      { foreground: "#94e2d5" }
+  lossless:   { foreground: "#94e2d5" }
+  crypto:     { foreground: "#585b70" }
+  document:   { foreground: "#cdd6f4" }
+  compressed: { foreground: "#f38ba8" }
+  temp:       { foreground: "#9399b2" }
+  compiled:   { foreground: "#74c7ec" }
+  build:      { foreground: "#585b70" }
+  source:     { foreground: "#89b4fa" }
+
+punctuation:         { foreground: "#585b70" }
+date:                { foreground: "#f9e2af" }
+inode:               { foreground: "#a6adc8" }
+blocks:              { foreground: "#a6adc8" }
+header:              { foreground: "#a6adc8", is_underline: true }
+octal:               { foreground: "#94e2d5" }
+flags:               { foreground: "#cba6f7" }
+symlink_path:        { foreground: "#f5c2e7" }
+control_char:        { foreground: "#89dceb" }
+broken_symlink:      { foreground: "#f38ba8" }
+broken_path_overlay: { foreground: "#585b70" }
