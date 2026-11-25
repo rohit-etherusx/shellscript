@@ -6,13 +6,11 @@ local launcherInterrupt = hl.dsp.global("shellscape:launcherInterrupt")
 
 -- Tapping Super alone opens the launcher; any Super shortcut must cancel that first.
 -- (The catch-all below only fires for keys that have no bind of their own.)
+-- Done as a second plain bind on the same keys, not a Lua wrapper function:
+-- function binds run on key press AND release, which launched apps twice.
 local function bind(keys, dsp, opts)
     if keys:find("Super") and not (opts and opts.mouse) and keys ~= "Super + Super_L" then
-        local action = dsp
-        dsp = function()
-            hl.dispatch(launcherInterrupt)
-            if type(action) == "function" then action() else hl.dispatch(action) end
-        end
+        hl.bind(keys, launcherInterrupt)
     end
     hl.bind(keys, dsp, opts)
 end
