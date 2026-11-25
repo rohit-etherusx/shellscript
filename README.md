@@ -1,13 +1,16 @@
 # Shellscape
 
-One-command terminal ricing **and a full Hyprland desktop** for **Fedora**.
-The terminal half was built and tested on Fedora 43 KDE (Plasma 6.7); the
-desktop half (Hyprland + the Quickshell-based Shellscape shell) targets Fedora 45
-and installs *next to* KDE — pick it at the login screen. Everything is themed in **Catppuccin Mocha**, every config file
-lives inside this folder, and the installer is a set of small idempotent modules
-you can run, skip or re-run individually.
+A one-command setup for **Fedora** that gives you two things:
 
-![Shellscape on Fedora KDE: Pokémon sprite, fastfetch and the shellscape prompt in Ptyxis](docs/screenshot.png)
+1. **A themed terminal**: zsh with a custom prompt, kitty, modern command-line
+   tools, tmux and a fastfetch/Pokémon banner. It works in any desktop,
+   including KDE Plasma.
+2. **A complete Hyprland desktop**: a tiling window manager with a bottom
+   taskbar, app launcher, dashboard, notifications, lock screen and a colour
+   scheme that follows your wallpaper. It installs *next to* your current
+   desktop; you choose it at the login screen.
+
+![Shellscape Hyprland desktop: wallpaper with the bottom taskbar (workspaces, pinned apps, status, clock)](docs/desktop.png)
 
 ```bash
 git clone git@github.com:rohit-etherusx/shellscript.git ~/projects/linux-ricing/Shellscape
@@ -15,298 +18,443 @@ cd ~/projects/linux-ricing/Shellscape
 ./install.sh
 ```
 
-Log out and back in (or `exec zsh`), press **Ctrl+Alt+T**, done. For the
-desktop, log out and choose **Hyprland (uwsm-managed)** at the login screen.
+Then log out, pick **Hyprland (uwsm-managed)** at the login screen, and tap the
+**Super** (Windows) key to open the launcher.
+
+---
+
+## Contents
+
+- [Screenshots](#screenshots)
+- [What you get](#what-you-get)
+- [Install](#install)
+- [First steps](#first-steps)
+- [Keyboard shortcuts](#keyboard-shortcuts)
+- [Customising](#customising)
+- [Where everything lives](#where-everything-lives)
+- [Troubleshooting](#troubleshooting)
+- [Uninstalling](#uninstalling)
+- [How it's built](#how-its-built)
+- [Credits](#credits)
+
+---
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Two kitty terminals side by side: Pokémon sprite with fastfetch on the left, wallpaper-coloured theme](docs/desktop-terminal.png) | ![The dashboard over Thunar: weather, system info, clock, calendar, resource meters and media player](docs/desktop-dashboard.png) |
+| Terminals with the wallpaper's colours | The dashboard (click the clock or the Fedora logo) |
+
+The terminal setup on KDE Plasma:
+
+![Shellscape on Fedora KDE: Pokémon sprite, fastfetch and the shellscape prompt in Ptyxis](docs/screenshot.png)
 
 ---
 
 ## What you get
 
-| Area | Details |
+### Terminal (any desktop)
+
+| | |
 |---|---|
-| **Shell** | zsh + Oh-My-Zsh, `shellscape` prompt (rounded powerline pills: time · directory · git · user), autosuggestions, syntax highlighting, fzf history, zoxide |
-| **Terminal** | kitty: JetBrainsMono Nerd Font, Catppuccin Mocha, 95 % opacity with blur, cursor trail, powerline tabs. Registered as KDE's default terminal and bound to `Ctrl+Alt+T` |
-| **Ptyxis** | Fedora's stock terminal gets the same Nerd Font, palette, beam cursor and opacity, so it matches if you open it anyway |
-| **CLI tools** | eza (`ls`), bat (`cat`, man pages), fzf, zoxide, ripgrep, fd — all themed to match |
-| **Banner** | fastfetch with the Fedora logo, or a random Pokémon sprite next to the system info, revealed line by line on every new shell |
-| **tmux** | `Ctrl-a` prefix, mouse, vi keys, Catppuccin status bar, TPM with sensible / yank / resurrect |
-| **Desktop** | KDE effects: glide open/close, wobbly windows, magic-lamp minimize, blur, translucency while moving, dimmed dialog parents |
-| **Fonts** | JetBrainsMono Nerd Font plus Fedora's JetBrains Mono, Fira Code, Source Code Pro, Noto, Noto Emoji, Font Awesome |
-| **Hyprland desktop** | Hyprland with blur, shadows, animations, workspace groups, special workspaces (sysmon / music / communication / todo), hypridle auto-lock, uwsm session, clipboard history, screenshots & screen recording |
-| **Shellscape shell** | Quickshell desktop: bar, app launcher (tap `Super`), dashboard with media/weather/calendar, notifications, OSDs, lock screen (password + fingerprint), session menu, wallpaper picker, audio-visualiser |
-| **`shellscape` CLI** | Material You colour schemes generated from your wallpaper and pushed live to the shell, Hyprland borders, kitty/foot (open terminals recolour instantly), GTK, Qt, btop, fuzzel, cava, htop, nvtop, Spotify, Discord, VS Code |
-| **Extra terminal stack** | foot + fish + starship from Caelestia, themed by the scheme; zsh + kitty stay the defaults |
-| **Optional apps** | `--with vscode`, `--with browser` (Firefox/Zen userChrome + CaelestiaFox), `--with spotify` (Spicetify), `--with discord` (Vesktop) |
+| **Shell** | zsh + Oh-My-Zsh with the `shellscape` prompt (rounded segments for time, folder, git status and user), autosuggestions, syntax highlighting |
+| **Terminal** | kitty with JetBrainsMono Nerd Font, slight transparency with blur, cursor trail, powerline tabs. On KDE it becomes the default terminal on `Ctrl+Alt+T` |
+| **Tools** | `eza` (ls), `bat` (cat and man pages), `fzf` (`Ctrl+R` history search), `zoxide` (`z <folder>`), `ripgrep`, `fd` |
+| **Banner** | fastfetch system info with the Fedora logo, or a random Pokémon sprite, on every new terminal |
+| **tmux** | `Ctrl+A` prefix, mouse support, vi keys, themed status bar, plugin manager |
+| **Also styled** | Ptyxis (Fedora's stock terminal), foot, fish, starship |
+| **KDE extras** | Glide, wobbly-window and magic-lamp animations, blur and translucency |
 
-Everything is a symlink from `~` back into `config/`, so editing a file here
-changes the live config immediately.
+### Hyprland desktop
 
----
-
-## Requirements
-
-- Fedora (the preflight module refuses anything else) with `sudo` access.
-- Internet for dnf. Everything that is *not* a Fedora package (Nerd Font,
-  Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts) ships compressed in
-  `vendor/`, so the installer never needs GitHub or GitLab. See
-  [Offline installs](#offline-installs).
-- KDE Plasma for the kitty default-terminal, Ptyxis and desktop-effects modules.
-  They skip themselves cleanly on other desktops.
+| | |
+|---|---|
+| **Taskbar** | One bar at the bottom: Fedora logo and workspaces on the left, pinned apps and open windows in the middle, tray, Wi-Fi, Bluetooth, battery, clock and power on the right |
+| **Launcher** | Tap Super, type to find apps. Also does calculations, wallpapers, colour schemes, light/dark mode and power actions |
+| **Dashboard** | Weather, calendar, system info, CPU/RAM/storage meters and a media player |
+| **Desktop** | Notifications, volume/brightness pop-ups, lock screen, power menu, screenshots and screen recording, clipboard history, emoji picker, colour picker |
+| **Colours** | Picking a wallpaper generates a matching colour scheme for the taskbar, window borders, terminals, GTK and Qt apps, btop and more, live |
+| **Windows** | Tiling with gaps, rounded corners, blur, shadows and animations. Extra pop-up workspaces for music, chat and a system monitor |
+| **Wallpapers** | 16 wallpapers included in `wallpaper/`, plus Fedora's default |
+| **Optional extras** | VS Code, Firefox/Zen, Spotify and Discord themes that follow the wallpaper colours (see [Install](#install)) |
 
 ---
 
-## Usage
+## Install
+
+### Requirements
+
+- **Fedora** with `sudo` access. The installer stops on any other distro. The
+  terminal part was built on Fedora 43; the Hyprland desktop needs **Fedora 45**,
+  because it uses Hyprland 0.57.
+- Internet access for Fedora's package repositories. Most other downloads (fonts,
+  Oh-My-Zsh, plugins) ship inside `vendor/`; see [Offline use](#offline-use).
+
+### Run it
 
 ```bash
-./install.sh                     # interactive: confirms the module list, asks for sudo once
-./install.sh --yes               # unattended
-./install.sh --list              # show modules and what they do
-./install.sh --only zsh          # run one module ("zsh", "30-zsh" or "30" all work)
-./install.sh --skip pokemon --skip kde-effects
-./uninstall.sh                   # remove symlinks, restore backups, offer to reset the shell
-./uninstall.sh --purge           # also remove Oh-My-Zsh, TPM, the Nerd Font, pokemon-colorscripts and the dnf packages
-./vendor.sh                      # refresh the compressed copies in vendor/ from the current install
+./install.sh                    # asks once for your sudo password, then confirms a few choices
+./install.sh --yes              # same, but answers "yes" to every question
+./install.sh --list             # show every step and what it does
+./install.sh --only 92          # run one step (by number or name: "92", "shellscape-shell")
+./install.sh --skip pokemon     # leave a step out
+./install.sh --with vscode      # also run an optional step
 ```
 
-Re-running `./install.sh` is always safe. Every module checks what is already
-installed, linked or configured and only does what is missing. A log of each run
-lands in `logs/`.
+**Re-running is always safe.** Each step checks what's already done and only
+fixes what's missing, so after an update, or if something failed, just run
+`./install.sh` again. Every run writes a log to `logs/`.
 
-### Modules
+### Steps
 
-Modules live in `modules/NN-name.sh` and run in numeric order.
-
-| Module | What it does |
+| Step | What it does |
 |---|---|
-| `00-preflight` | Verifies Fedora, non-root, sudo and internet. Installs git, curl, unzip, tar, xz. Creates `~/.config`, `~/.local/bin`, `~/.local/share/fonts`. |
-| `10-fonts` | Fedora font packages, then unpacks the vendored JetBrainsMono Nerd Font into `~/.local/share/fonts/JetBrainsMonoNerdFont/` (downloads the release zip only if `vendor/` is missing). |
-| `20-cli-tools` | eza, bat, fzf, zoxide, ripgrep, fd. Links the eza and bat Catppuccin themes. |
-| `30-zsh` | zsh, Oh-My-Zsh (unattended, keeps our `.zshrc`), autosuggestions and syntax-highlighting plugins, bundled prompt themes. Offers to make zsh the login shell. |
-| `40-kitty` | kitty plus config. Makes kitty KDE's default terminal, moves `Ctrl+Alt+T` from Konsole to kitty, writes `~/.config/xdg-terminals.list`. |
-| `45-ptyxis` | Points Ptyxis at the Nerd Font, the built-in "Catppuccin Mocha" palette and a blinking beam cursor. Skips if Ptyxis is absent. |
-| `50-fastfetch` | fastfetch and chafa, links the four fastfetch layouts and the Fedora logo. |
-| `60-tmux` | tmux and config, installs TPM and its plugins. |
-| `70-pokemon` | Installs pokemon-colorscripts into `/opt` and switches the startup banner to the Pokémon layout. |
-| `80-kde-effects` | Enables the KWin effects listed above, bumps blur strength, sets Ptyxis to 92 % opacity, and reloads KWin live over D-Bus. Asks first. |
+| `00-preflight` | Checks for Fedora, sudo and internet; installs git, curl, unzip, tar, xz |
+| `10-fonts` | Fedora fonts and the JetBrainsMono Nerd Font (the icons in the prompt and taskbar need it) |
+| `20-cli-tools` | eza, bat, fzf, zoxide, ripgrep, fd |
+| `30-zsh` | zsh, Oh-My-Zsh, plugins and prompt themes; offers to make zsh your login shell |
+| `40-kitty` | kitty and its config; on KDE, sets it as the default terminal |
+| `45-ptyxis` | Gives Fedora's Ptyxis terminal the same font and colours |
+| `50-fastfetch` | System-info banner with the Fedora logo |
+| `60-tmux` | tmux, its config and plugins |
+| `70-pokemon` | Pokémon sprites for the banner |
+| `80-kde-effects` | KDE window animations and blur (asks first) |
+| `90-hyprland` | Hyprland and its tools, the session setup and the Hyprland config |
+| `91-shellscape-cli` | The `shellscape` command (wallpapers, colour schemes, screenshots, recording) |
+| `92-shellscape-shell` | The desktop itself (taskbar, launcher, dashboard, lock screen), its fonts, and the default wallpaper |
+| `93-desktop-apps` | foot, fish, starship, btop, Qt/GTK theming; makes GNOME Settings work under Hyprland |
+| `95-vscode` *(optional)* | VS Code settings and a theme that follows the wallpaper. **Replaces your VS Code settings** (with a backup) |
+| `96-browser` *(optional)* | Firefox/Zen theme; install the CaelestiaFox add-on for live colours |
+| `97-spotify` *(optional)* | Spotify (Flatpak) themed with Spicetify |
+| `98-discord` *(optional)* | Vesktop (Flatpak) with a theme that follows the wallpaper |
+
+The full package list is in [PACKAGES.md](PACKAGES.md).
+
+### After installing
+
+1. **Log out.** At the login screen, pick **Hyprland (uwsm-managed)**. The plain
+   **Hyprland** entry works too.
+2. Your KDE (or GNOME) session is untouched; pick it at the login screen to go back.
+3. Your login shell is now zsh. In KDE, `Ctrl+Alt+T` opens kitty.
 
 ---
 
-## Layout
+## First steps
 
-```
-Shellscape/
-├── install.sh          entry point: runs modules/ in order, prints a summary
-├── uninstall.sh        removes symlinks, restores backups (--purge removes packages too)
-├── vendor.sh           repacks every non-dnf dependency into vendor/ (xz-compressed)
-├── PACKAGES.md         every dependency and where it comes from
-├── docs/               screenshot
-├── lib/common.sh       shared helpers: logging, dnf, backup+symlink, git clone, download, vendor
-├── modules/            one self-contained, idempotent step each (NN-name.sh; "# optional" ones need --with)
-├── desktop/
-│   ├── shell/          Quickshell QML desktop  → ~/.config/quickshell/shellscape
-│   ├── cli/            Python `shellscape` CLI (built into a wheel, installed system-wide)
-│   └── UPSTREAM        exact upstream commits that were imported
-├── tools/absorb.sh     re-imports + rebrands the upstream Caelestia repos (see "Desktop")
-├── tests/selection.sh  self-check for --skip/--only/--with
-├── config/             the source of truth, symlinked into ~
-│   ├── zsh/            .zshrc  .zprofile  aliases.zsh  colors.zsh  themes/*.zsh-theme
-│   ├── kitty/          kitty.conf  theme.conf (Catppuccin Mocha)
-│   ├── fastfetch/      config.jsonc  config-v2  config-compact  config-pokemon  fedora.png
-│   ├── tmux/           tmux.conf  plugins/ (populated by TPM at install time)
-│   ├── eza/            theme.yml
-│   ├── bat/            config
-│   ├── hypr/           hyprland.lua, variables.lua (apps, gaps, blur, keyboard), hyprland/*.lua, hypridle.conf
-│   ├── uwsm/ foot/ fish/ starship.toml btop/ micro/ qt5ct/ qt6ct/ thunar/
-│   └── vscode/ firefox/ zen/ spicetify/ zed/     used by the optional modules
-├── vendor/             compressed copies: Nerd Font, Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts (~16 MB)
-├── logs/               install logs, links.list, backups.list      (gitignored)
-└── build/              downloaded zips and cloned sources           (gitignored)
+**Open apps.** Tap **Super** and start typing, then press Enter. Or click an app
+in the middle of the taskbar.
+
+**The taskbar.**
+- **Click** an app to open it, or to jump to it if it's already open. The dots
+  under an icon are its open windows.
+- **Middle-click** opens another window of that app.
+- **Right-click** pins an app to the taskbar, or unpins it.
+- **Click a workspace dot** to switch workspace.
+- **Click the Fedora logo or the clock** to open the dashboard.
+- **Click Wi-Fi or Bluetooth** for those settings.
+- **Click the power icon** for lock, log out, restart and shut down.
+
+**Change the wallpaper.** Tap Super, type **`>wallpaper`** followed by a
+**space**, then pick one. The whole desktop recolours itself to match. From a
+terminal:
+
+```bash
+shellscape wallpaper -f ~/Pictures/Wallpapers/shellscape/foggy-city.png
+shellscape wallpaper -r      # random wallpaper
 ```
 
-### Files Shellscape creates in `$HOME`
+**More launcher commands.** Type `>` in the launcher to list them:
+`>calc 2+2`, `>scheme` (colour scheme), `>variant` (scheme style), `>light`,
+`>dark`, `>transparency`, `>random` (random wallpaper), `>lock`, `>sleep`,
+`>logout`, `>reboot`, `>shutdown`.
 
-All of these are symlinks into `config/`. Anything that already existed is moved
-to `<name>.bak.<timestamp>` and put back by `./uninstall.sh`.
+**Settings.**
+- **Super+I**: quick settings for Wi-Fi, Bluetooth and audio.
+- **Settings** (GNOME Settings) and **System Settings** (KDE) both open from the
+  launcher, for displays, users and everything else.
 
-```
-~/.zshrc             → config/zsh/.zshrc
-~/.zprofile          → config/zsh/.zprofile
-~/.config/zsh        → config/zsh
-~/.config/kitty      → config/kitty
-~/.config/fastfetch  → config/fastfetch
-~/.config/tmux       → config/tmux
-~/.config/eza        → config/eza
-~/.config/bat        → config/bat
-~/.config/hypr       → config/hypr          ~/.config/uwsm  → config/uwsm
-~/.config/quickshell/shellscape → desktop/shell
-~/.config/foot ~/.config/fish ~/.config/starship.toml ~/.config/btop
-~/.config/micro ~/.config/qt5ct ~/.config/qt6ct  → config/…
-```
+---
 
-Per-machine Hyprland overrides go in `~/.config/shellscape/hypr-vars.lua`
-(variables, e.g. `V.browser = "brave-browser"`, `V.kbLayout = "de"`) and
-`~/.config/shellscape/hypr-user.lua` (any Hyprland Lua config, e.g. `hl.monitor{…}`). Shell settings live in `~/.config/shellscape/shell.json`.
-None of these are inside the repo.
+## Keyboard shortcuts
 
-Settings that are not files (Ptyxis font and palette, KDE default terminal, the
-`Ctrl+Alt+T` shortcut, KWin effects) are written with `gsettings`,
-`kwriteconfig6` and D-Bus, and are listed in each module's header comment.
+**Super** is the Windows key. Tapping it on its own opens the launcher; holding
+it with another key runs that shortcut instead.
+
+### Apps
+
+| Keys | Action |
+|---|---|
+| `Super+T` | Terminal (kitty) |
+| `Super+B` | Browser |
+| `Super+E` | Files (Thunar) |
+| `Super+C` | Code editor (VS Code) |
+| `Super+I` | Quick settings (Wi-Fi, Bluetooth, audio) |
+| `Ctrl+Alt+V` | Volume mixer |
+| `Ctrl+Alt+Esc` | Process manager |
+
+### Windows
+
+| Keys | Action |
+|---|---|
+| `Super+Q` | Close window |
+| `Super+F` | Fullscreen |
+| `Super+Alt+F` | Maximise (keeps the taskbar and gaps) |
+| `Super+Alt+Space` | Toggle floating / tiled |
+| `Super+P` | Pin window to every workspace |
+| `Super+Arrows` | Move focus |
+| `Super+Shift+Arrows` | Move window |
+| `Super`+drag with the left mouse button, or `Super+Z` | Move a window with the mouse |
+| `Super`+drag with the right mouse button, or `Super+X` | Resize a window with the mouse |
+| `Super+Minus` / `Super+Equal` | Shrink / grow the split |
+| `Ctrl+Super+\` | Centre window |
+| `Super+Alt+\` | Picture-in-picture |
+| `Alt+Tab` | Next window |
+
+### Workspaces
+
+| Keys | Action |
+|---|---|
+| `Super+1` … `Super+0` | Go to workspace 1–10 |
+| `Super+Alt+1` … `Super+Alt+0` | Send window to workspace 1–10 |
+| `Ctrl+Super+Left/Right`, or `Super`+scroll | Previous / next workspace |
+| `Super+S` | Show / hide the scratch workspace |
+| `Super+Alt+S` | Send window to the scratch workspace |
+| `Super+M` | Music workspace |
+| `Super+D` | Chat workspace |
+| `Ctrl+Shift+Esc` | System monitor (btop) |
+
+### Screenshots and recording
+
+| Keys | Action |
+|---|---|
+| `Print` | Whole screen, copied to the clipboard |
+| `Super+Shift+S` | Select an area (the screen freezes while you choose) |
+| `Super+Alt+R` | Record the screen with sound |
+| `Ctrl+Alt+R` | Record the screen |
+| `Super+Shift+Alt+R` | Record an area |
+| `Super+Shift+C` | Colour picker |
+
+Screenshots go to `~/Pictures/Screenshots`, recordings to `~/Videos/Recordings`.
+
+### Clipboard, emoji and media
+
+| Keys | Action |
+|---|---|
+| `Super+V` | Clipboard history |
+| `Super+.` | Emoji picker |
+| `Ctrl+Super+Space` | Play / pause |
+| `Ctrl+Super+=` / `Ctrl+Super+-` | Next / previous track |
+| `Super+Shift+M` | Mute |
+
+### Session
+
+| Keys | Action |
+|---|---|
+| `Super+L` | Lock screen |
+| `Ctrl+Alt+Delete` | Power menu |
+| `Super+Shift+L` | Sleep |
+| `Super+K` | Show all panels |
+| `Ctrl+Alt+C` | Clear notifications |
+| `Ctrl+Super+Alt+R` | Restart the desktop shell (if the taskbar misbehaves) |
+
+The full list is in [`config/hypr/hyprland/keybinds.lua`](config/hypr/hyprland/keybinds.lua).
+
+### In the terminal
+
+| Keys | Action |
+|---|---|
+| `Ctrl+R` | Search command history |
+| `Ctrl+T` | Find a file |
+| `Alt+C` | Jump to a folder |
+| `z <name>` | Jump to a folder you've visited |
+| `Esc Esc` | Put `sudo` in front of the current command |
+| `Ctrl+Shift+Enter` / `Ctrl+Shift+T` | New kitty window / tab in the same folder |
+| `Ctrl+Shift+Left/Right` | Previous / next kitty tab |
+| `Ctrl+Shift+=` / `-` / `0` | Bigger / smaller / reset font |
+
+**tmux** (press `Ctrl+A` first): `|` and `-` split the window, `h` `j` `k` `l`
+move between panes (`H` `J` `K` `L` resize them), `c` opens a new window,
+`r` reloads the config, `I` installs plugins.
 
 ---
 
 ## Customising
 
-### Prompt
+All config files live in this folder and are **linked** into your home folder,
+so editing a file here changes your setup immediately. Settings that should
+apply to this computer only go in `~/.config/shellscape/` instead, which is not
+part of the repo.
 
-`config/zsh/.zshrc` sets `ZSH_THEME="shellscape"`. The theme lives in
-`config/zsh/themes/shellscape.zsh-theme`: two lines, rounded segments, Catppuccin
-colours defined in one map at the top of the file. It shows a red ✘ when the last
-command failed, ⚡ as root, ⚙ with background jobs, and a git segment that goes
-green (clean), yellow (untracked) or red (modified/deleted) with ahead/behind counts.
+### Desktop
 
-Other bundled themes: `agnosterzak antares bullet-train color-input comfyline
-emoji fishbone++`, plus everything Oh-My-Zsh ships.
-
-### Startup banner
-
-Three variables at the top of the banner section in `config/zsh/.zshrc`:
-
-```zsh
-SHELLSCAPE_BANNER="pokemon"     # fastfetch | pokemon | none
-SHELLSCAPE_BANNER_ANIM=1        # 1 = reveal line by line, 0 = instant
-SHELLSCAPE_BANNER_DELAY=3       # hundredths of a second between lines
-```
-
-fastfetch layouts are in `config/fastfetch/`. `config-pokemon.jsonc` is the one
-used next to the sprite (as in the screenshot above); `config-compact.jsonc` is
-used for the plain banner.
-
-### Colours
-
-Everything is Catppuccin Mocha. The places to change if you want another palette:
-
-| What | File |
+| To change | Do this |
 |---|---|
-| Prompt | `config/zsh/themes/shellscape.zsh-theme` (the `SS` map) |
-| Command-line syntax and autosuggestions | `config/zsh/colors.zsh` |
-| kitty | `config/kitty/theme.conf` |
-| eza listings | `config/eza/theme.yml` |
-| bat | `config/bat/config` (`--theme`) |
-| fzf | `FZF_DEFAULT_OPTS` in `config/zsh/.zshrc` |
-| tmux status bar | `config/tmux/tmux.conf` |
-| Ptyxis | palette name in `modules/45-ptyxis.sh` |
+| **Pinned apps** | Right-click apps on the taskbar, or edit `dock.pinned` in `~/.config/shellscape/shell.json` (a list of `.desktop` file names without the extension) |
+| **Default apps** (Super+T/B/E/C) | Add lines to `~/.config/shellscape/hypr-vars.lua`, e.g. `V.browser = "brave-browser"`, `V.terminal = "foot"` |
+| **Keyboard layout** | `V.kbLayout = "de"` (and `V.kbVariant`) in the same file |
+| **Night light** | It warms the screen after sunset. Turn it off with `V.nightLight = false` in the same file |
+| **Gaps, blur, rounding, opacity, cursor** | Copy the variable from [`config/hypr/variables.lua`](config/hypr/variables.lua) into `hypr-vars.lua` and change it |
+| **Monitors** | e.g. `hl.monitor({ output = "DP-1", mode = "2560x1440@144", position = "0x0", scale = 1 })` in `~/.config/shellscape/hypr-user.lua` |
+| **Your own keybinds** | `hl.bind("Super + G", hl.dsp.exec_cmd("gimp"))` in `hypr-user.lua` |
+| **Wallpapers** | Drop images into `wallpaper/` (shared via git) or `~/Pictures/Wallpapers` (this computer only). Press `Ctrl+Super+Alt+R` afterwards so the picker sees new files in `wallpaper/` |
+| **Colour scheme** | `>scheme` in the launcher, or `shellscape scheme list` / `shellscape scheme set -n gruvbox -f hard`. The `dynamic` scheme follows the wallpaper |
+| **Everything else in the shell** | `~/.config/shellscape/shell.json`; see the options in [`desktop/shell/config/`](desktop/shell/config/) |
 
-### Aliases
+Hyprland changes apply when you save the file. If something is wrong, Hyprland
+shows the error at the top of the screen; check a file without applying it with
+`Hyprland --verify-config -c ~/.config/hypr/hyprland.lua`.
 
-From `config/zsh/aliases.zsh`:
+### Terminal
 
-| Alias | Runs |
+| To change | Where |
 |---|---|
-| `ls` `l` `la` `lla` `lt` | eza with icons, directories first; `l`/`lla` add git status, `lt` is a two-level tree |
-| `cat` / `catn` | bat without paging / plain GNU cat |
-| `update` `install` `remove` `search` | the matching `dnf` commands |
-| `..` `...` `cls` `ff` | up one/two dirs, clear, fastfetch |
-| `shellscape` | re-run the installer from anywhere |
-| `zshrc` | open `config/zsh/.zshrc` in `$EDITOR` |
+| Prompt theme | `ZSH_THEME` in `config/zsh/.zshrc`. The default `shellscape` theme is in `config/zsh/themes/`; also included: `agnosterzak antares bullet-train color-input comfyline emoji fishbone++` |
+| Startup banner | `SHELLSCAPE_BANNER="fastfetch"`, `"pokemon"` or `"none"` in `config/zsh/.zshrc` (`SHELLSCAPE_BANNER_ANIM=0` turns off the line-by-line reveal) |
+| Aliases | `config/zsh/aliases.zsh` |
+| kitty | `config/kitty/kitty.conf` and `theme.conf` |
+| tmux | `config/tmux/tmux.conf` |
+| Things only for this computer | `~/.zshrc.local` (loaded last, not in the repo) |
 
-Machine-specific additions go in `~/.zshrc.local`, which is sourced last and not
-tracked.
-
-### Keybindings
-
-**kitty** (on top of the defaults)
-
-| Keys | Action |
-|---|---|
-| `Ctrl+Shift+Enter` / `Ctrl+Shift+T` | new window / new tab in the current directory |
-| `Ctrl+Shift+←` / `→` | previous / next tab |
-| `Ctrl+Shift+=` / `-` / `0` | font size up / down / reset |
-| `F11` | fullscreen |
-| `Ctrl+Shift+Z` / `X` | jump to previous / next prompt (shell integration) |
-
-**tmux** (prefix is `Ctrl-a`)
-
-| Keys | Action |
-|---|---|
-| `prefix` `\|` / `-` | split right / below, in the current directory |
-| `prefix` `c` | new window in the current directory |
-| `prefix` `h` `j` `k` `l` | move between panes; `H J K L` resize |
-| `prefix` `r` | reload the config |
-| `prefix` `I` | install / update TPM plugins |
-| `v` / `y` in copy mode | begin selection / yank |
-
-**zsh**: `Ctrl-R` fuzzy history, `Ctrl-T` fuzzy file picker, `Alt-C` fuzzy cd,
-`z <dir>` zoxide jump, `Esc Esc` prefixes the line with `sudo`.
+Handy aliases: `ls`/`l`/`la`/`lt` (eza listings), `cat` (bat), `update`,
+`install`, `remove`, `search` (dnf), `ff` (fastfetch), `zshrc` (edit the zsh
+config), `shellscape-install` (re-run the installer from anywhere).
 
 ---
 
-## Offline installs
+## Where everything lives
 
-`vendor/` holds an xz-compressed copy of every dependency that is not a Fedora
-package, and it is committed to the repo:
+```
+Shellscape/
+├── install.sh            the installer: runs modules/ in order
+├── uninstall.sh          undoes it (see Uninstalling)
+├── vendor.sh             refreshes the offline copies in vendor/
+├── PACKAGES.md           every package and where it comes from
+├── modules/              one install step per file (NN-name.sh)
+├── lib/common.sh         shared installer helpers
+├── config/               all config files, linked into ~/.config
+│   ├── hypr/             Hyprland (Lua): hyprland.lua, variables.lua, hyprland/*.lua
+│   ├── zsh/ kitty/ tmux/ fastfetch/ eza/ bat/
+│   ├── foot/ fish/ starship.toml btop/ micro/ qt5ct/ qt6ct/ uwsm/ thunar/
+│   ├── systemd/          session file that starts the portal and polkit agent
+│   └── vscode/ firefox/ zen/ spicetify/ zed/   used by the optional steps
+├── desktop/
+│   ├── shell/            the desktop shell (Quickshell/QML), linked to ~/.config/quickshell/shellscape
+│   ├── cli/              the `shellscape` command (Python)
+│   └── UPSTREAM          which upstream versions were imported
+├── wallpaper/            wallpapers, linked to ~/Pictures/Wallpapers/shellscape
+├── vendor/               offline copies of the non-Fedora downloads
+├── docs/                 screenshots
+├── tools/absorb.sh       re-imports the upstream Caelestia code
+└── tests/selection.sh    test for the installer's --only/--skip/--with options
+```
 
-| Archive | Contents | Size |
-|---|---|---|
-| `JetBrainsMono.tar.xz` | all 96 Nerd Font TTFs (233 MB unpacked) | ~6 MB |
-| `oh-my-zsh.tar.xz` | Oh-My-Zsh without `.git` | ~3 MB |
-| `pokemon-colorscripts.tar.xz` | sprites and installer | ~5 MB |
-| `zsh-autosuggestions.tar.xz` `zsh-syntax-highlighting.tar.xz` `tpm.tar.xz` | plugins | < 1 MB |
+Anything that already existed in your home folder is moved to
+`<name>.bak.<date>` before Shellscape links its own file there, and
+`./uninstall.sh` puts it back.
 
-`install.sh` always prefers these and unpacks them straight into place; it only
-reaches out to GitHub or GitLab when an archive is missing. So on a fresh machine
-the only network access needed is Fedora's own package repos.
+Your own settings, outside the repo:
 
-`./vendor.sh` rebuilds the archives from a machine where the installer has
-already completed (the Nerd Font is re-packed from the downloaded release zip in
-`build/`). Run it after updating a plugin or the font to refresh the repo copy.
+| File | What it's for |
+|---|---|
+| `~/.config/shellscape/shell.json` | Shell settings, including pinned apps |
+| `~/.config/shellscape/hypr-vars.lua` | Your Hyprland variables (apps, keyboard, night light) |
+| `~/.config/shellscape/hypr-user.lua` | Any extra Hyprland config (monitors, keybinds) |
+| `~/.local/state/shellscape/` | Current wallpaper and colour scheme |
+| `~/.zshrc.local` | Your own zsh additions |
 
-Copy the whole folder anywhere (git, rsync, USB) and run `./install.sh`. The
-symlinks are absolute, so the folder can live at any path. If you move it
-*after* installing, re-run `./install.sh` to re-link.
+### Offline use
+
+`vendor/` holds compressed copies of everything that isn't a Fedora package:
+the Nerd Font, Oh-My-Zsh, the zsh and tmux plugins and the Pokémon sprites. The
+installer uses these first. A fresh install still needs Fedora's repositories
+and a few desktop downloads from GitHub (app2unit, Material Symbols and the
+CaskaydiaCove font); `./vendor.sh` adds app2unit and Material Symbols to
+`vendor/` too. Copy the folder anywhere (git, USB, rsync) and run
+`./install.sh`. If you move the folder after installing, run `./install.sh` again
+to update the links.
 
 ---
 
 ## Troubleshooting
 
-**Stray letters or boxes around the prompt segments.** The terminal is not using
-a Nerd Font. kitty is configured for it already; for Ptyxis run
-`./install.sh --only ptyxis`; for anything else pick "JetBrainsMono Nerd Font" in
-its font settings.
+**No taskbar, or Super does nothing, after logging in to Hyprland.** Press
+`Ctrl+Super+Alt+R` to restart the shell. If it still doesn't appear, run
+`qs -c shellscape log` in a terminal (`Super+T`) and look for `ERROR` lines.
 
-**A command in `~/.local/bin` is "not found" in a new terminal.** Ptyxis, Konsole
-and kitty open non-login shells, so `.zprofile` is skipped. `.zshrc` prepends
-`~/.local/bin` and `~/bin` itself, so this only happens if that block was
-removed.
+**Hyprland shows a red error bar at the top.** A config file has a mistake. Run
+`Hyprland --verify-config -c ~/.config/hypr/hyprland.lua` to see which line.
 
-**Listings or syntax colours look wrong in Ptyxis.** Its palette setting must be
-exactly `Catppuccin Mocha`. Check with
-`gsettings get org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/<uuid>/ palette`.
+**"Authentication agent missing" or "XDG desktop portal missing" on first login.**
+Run `./install.sh --only 90` and log in again. That step installs the session
+file that starts both services.
 
-**KDE effects did not change.** KWin's reconfigure call does not load or unload
-effects. The module toggles each one over D-Bus; verify with:
+**The launcher finds nothing for "wallpaper".** Type `>wallpaper` followed by a
+space; without the `>` it searches for apps.
 
-```bash
-gdbus call --session --dest org.kde.KWin --object-path /Effects \
-  --method org.freedesktop.DBus.Properties.Get org.kde.kwin.Effects loadedEffects
-```
+**New wallpapers don't show in the picker.** Press `Ctrl+Super+Alt+R`.
 
-Blur only applies to windows that ask for it. kitty does on Plasma 6.4+; Ptyxis
-(GTK) does not, so its translucency shows the wallpaper unblurred.
+**`shellscape` runs the installer instead of the desktop command.** Your zsh
+config is older than this version. Re-run `./install.sh --only 30` or open a new
+terminal; the installer alias is now `shellscape-install`.
 
-**The first prompt after login shows ✘.** `.zshrc` ends with `true` to prevent
-exactly this. If you add lines after it, keep `true` last.
+**The screen looks warm or yellow in the evening.** That's night light; see
+[Customising](#desktop).
 
-**tmux plugins missing.** Press `prefix` `I` inside tmux, or run
-`~/.tmux/plugins/tpm/bin/install_plugins`.
+**A settings app won't open.** GNOME Settings needs `./install.sh --only 93`
+(it normally refuses to run outside GNOME). KDE System Settings works as-is.
 
-**Something failed mid-install.** Check the newest file in `logs/` and re-run
-`./install.sh`. Only the missing parts are redone.
+**Boxes or stray letters instead of icons in the prompt.** The terminal isn't
+using a Nerd Font. kitty is set up already; for Ptyxis run
+`./install.sh --only ptyxis`; for other terminals pick "JetBrainsMono Nerd Font".
+
+**tmux plugins missing.** Press `Ctrl+A` then `I` inside tmux.
+
+**Something failed during install.** Read the newest file in `logs/`, then run
+`./install.sh` again. It only redoes what's missing.
 
 ---
 
-## Adding a module
+## Uninstalling
 
-Create `modules/NN-name.sh`, make it executable, and `install.sh` picks it up:
+```bash
+./uninstall.sh            # remove Shellscape's links, put your old files back, offer to switch back to bash
+./uninstall.sh --purge    # also offers to remove Oh-My-Zsh, fonts, the desktop and the installed packages
+```
+
+`--purge` asks before each removal.
+
+---
+
+## How it's built
+
+**Terminal.** The zsh, kitty and fastfetch setup started from
+[JaKooLit's Arch-Hyprland](https://github.com/JaKooLit/Arch-Hyprland) dotfiles,
+ported to Fedora's `dnf` and extended.
+
+**Desktop.** The desktop is the Fedora fork of the
+[Caelestia](https://github.com/caelestia-dots) dotfiles, absorbed into this repo
+and renamed to Shellscape. `tools/absorb.sh` copies the upstream repos (cloned
+next to this folder), renames every `caelestia` to `shellscape`, and fails if any
+old name is left. The exception is the `caelestiafox` id, which the published
+Firefox add-on looks for by name.
+
+Changes on top of upstream:
+
+- **Hyprland 0.57.** It replaced the old config format with Lua and changed its
+  command syntax. The whole Hyprland config is rewritten in Lua, and the shell
+  and the `shellscape` command use the new commands.
+- **One bottom taskbar** with pinned apps, replacing Caelestia's left bar.
+- **Fedora packaging.** Hyprland, Quickshell and starship come from Fedora COPR
+  repositories; app2unit and the shell's audio and idle helpers are built from source.
+- **Session fixes.** The desktop portal and polkit agent start from either login entry.
+- **Fixes:** a Super shortcut no longer also opens the launcher; theming no
+  longer stops halfway when a Sass compiler is missing; the launcher no longer
+  breaks when apps are installed; GNOME Settings works; US keyboard layout
+  instead of the fork author's French one.
+
+**Adding your own install step.** Create `modules/NN-name.sh` and make it
+executable; `install.sh` picks it up automatically:
 
 ```bash
 #!/usr/bin/env bash
@@ -317,81 +465,22 @@ install_pkgs some-package another-package
 link_dotfile "$CONFIG_DIR/whatever" "$HOME/.config/whatever"
 ```
 
-Helpers from `lib/common.sh`: `install_pkgs`, `link_dotfile`, `git_clone`,
-`download`, `vendor_extract`, `run_logged`, `ask_yes_no`, `need_cmd`, and the
-loggers `ok` `info` `note` `warn` `error` `die` `section`. `ASSUME_YES=1` is
-exported when the installer runs with `--yes`, and `ask_yes_no` honours it.
-Keep modules idempotent: check before you change, and exit 0 when there is
-nothing to do.
+Add a line containing only `# optional` to make it run only with `--with`.
+Helpers in `lib/common.sh`: `install_pkgs`, `link_dotfile`, `enable_copr`,
+`git_clone`, `download`, `run_logged`, `ask_yes_no`, `need_cmd`, and the log
+functions `ok`, `info`, `note`, `warn`, `die`.
 
 ---
 
-## Desktop
-
-The desktop is an absorbed, rebranded copy of the Fedora fork of the Caelestia
-dots. `tools/absorb.sh` copies the three upstream repos (cloned next to this
-folder) into `desktop/` and `config/`, renames every `caelestia` identifier to
-`shellscape` (command, Python package, Quickshell config name, IPC/shortcut ids,
-`~/.config|.local/state|.cache/shellscape`, theme files, the VS Code extension),
-and fails if anything is left over. Deliberately unchanged: upstream credit URLs
-and the `caelestiafox` native-messaging id, which the published Firefox add-on
-looks for by name.
-
-Fedora-specific changes on top of the import:
-
-- Hyprland 0.57 dropped the hyprlang `.conf` format and the old
-  `dispatch <name> <args>` syntax. The whole Hyprland config is ported to Lua
-  (`config/hypr/hyprland.lua` + `hyprland/*.lua`, checked with
-  `Hyprland --verify-config`); the shell's QML and the CLI send Lua dispatchers
-  (`hl.dsp.focus({ workspace = 3 })`); the CLI writes the colour scheme as
-  `scheme/current.lua` and reloads Hyprland; `wsaction.fish` is replaced by Lua
-  callbacks; the fork author's French keyboard layout is now `us` (`V.kbLayout`).
-- Hyprland, hypridle, hyprpicker, hyprpolkitagent, uwsm come from the
-  `sdegler/hyprland` COPR (Fedora 45 dropped Hyprland); Quickshell from
-  `errornointernet/quickshell` (`quickshell-git`, as the shell requires); starship from `atim/starship`.
-- `app2unit` is built from source; the shell's two native helpers
-  (`beat_detector`, `inhibit_idle`) are compiled into `/usr/lib/shellscape/`
-  (upstream's Fedora installer never built `inhibit_idle`).
-- Polkit agent → `hyprpolkitagent`; geoclue agent path → `/usr/libexec`;
-  `sway-audio-idle-inhibit` (not packaged) dropped; cursor → `breeze_cursors`.
-- Default apps: kitty (terminal), VS Code, Thunar; the browser is auto-detected
-  into `hypr-vars.lua`. Removed the fork author's personal Flameshot/Zen bindings.
-- The CLI skips Discord theming when Dart Sass is missing (`--with discord`
-  installs it) instead of
-  crashing when no Sass compiler exists (upstream aborted the whole theme run,
-  so GTK/Qt/btop never got recoloured).
-- zsh replays the scheme's terminal colours on start, so new kitty windows match
-  the wallpaper once the desktop has run.
-
-**Bottom bar (replaces Caelestia's left bar):** one full-width bar. Left: Fedora
-logo (opens the dashboard) and workspaces. Centre: pinned apps and other open
-windows; click to open or jump to an app, middle-click for a new window,
-right-click to pin or unpin (saved to `~/.config/shellscape/shell.json`,
-`dock.pinned`). Right: tray, Wi-Fi and Bluetooth (open the control center),
-battery, clock (dashboard) and power (session menu). The left bar is switched
-off; set `bar.persistent` to `true` in `shell.json` to bring it back.
-
-**Login:** both Hyprland entries work. For the plain "Hyprland" entry,
-`hyprland-session.target` (in `config/systemd/`) starts the systemd graphical
-session that Fedora's desktop portal and polkit agent need; uwsm does that by
-itself. On first install, Fedora's default wallpaper is set and the colour
-scheme is generated from it.
-
-Keybinds (Super = launcher): `Super+T` terminal, `Super+B` browser, `Super+E`
-files, `Super+C` editor, `Super+1…0` workspaces, `Super+Alt+1…0` move window,
-`Super+S` special workspace, `Super+V` clipboard, `Super+.` emoji,
-`Super+Shift+S` region screenshot, `Super+Alt+R` record, `Super+L` lock,
-`Ctrl+Alt+Del` session menu, `Ctrl+Super+Alt+R` restart the shell. The full
-list is `config/hypr/hyprland/keybinds.lua`.
-
 ## Credits
 
-- Colours: [Catppuccin Mocha](https://github.com/catppuccin)
-- Sprites: [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
-- Font: [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) build of JetBrains Mono
 - Desktop: [caelestia-dots](https://github.com/caelestia-dots) by soramane and the
-  [Fedora fork](https://github.com/EnceladusII/caelestia-fedora) by EnceladusII —
-  shell and CLI are GPL-3.0; their `LICENSE` files are kept in `desktop/shell`
-  and `desktop/cli`, and Shellscape's desktop part is GPL-3.0 as a result.
-- Shell framework: [Oh-My-Zsh](https://ohmyz.sh) and the
-  [zsh-users](https://github.com/zsh-users) plugins
+  [Fedora fork](https://github.com/EnceladusII/caelestia-fedora) by EnceladusII.
+  The shell and command-line tool are GPL-3.0; their licences are kept in
+  `desktop/shell` and `desktop/cli`, so those parts of Shellscape are GPL-3.0 too.
+- Terminal starting point: [JaKooLit/Arch-Hyprland](https://github.com/JaKooLit/Arch-Hyprland)
+- Window manager: [Hyprland](https://hyprland.org); widgets: [Quickshell](https://quickshell.outfoxxed.me)
+- Colours: [Catppuccin](https://github.com/catppuccin) and Material You
+- Fonts: [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) (JetBrains Mono, CaskaydiaCove), Google Material Symbols
+- Shell framework: [Oh-My-Zsh](https://ohmyz.sh) and the [zsh-users](https://github.com/zsh-users) plugins
+- Sprites: [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)

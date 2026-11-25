@@ -63,7 +63,7 @@ Searcher {
         return keys.map(k => item[k]).join(" ");
     }
 
-    list: variants.instances
+    list: variants.instances.filter(i => i.modelData)
     useFuzzy: Config.launcher.useFuzzy.apps
 
     Variants {
@@ -73,14 +73,15 @@ Searcher {
 
         QtObject {
             required property DesktopEntry modelData
-            readonly property string id: modelData.id
-            readonly property string name: modelData.name
-            readonly property string desc: modelData.comment
-            readonly property string execString: modelData.execString
-            readonly property string wmClass: modelData.startupClass
-            readonly property string genericName: modelData.genericName
-            readonly property string categories: modelData.categories.join(" ")
-            readonly property string keywords: modelData.keywords.join(" ")
+            // Entries go null for a moment when the desktop files reload (e.g. an app is installed).
+            readonly property string id: modelData?.id ?? ""
+            readonly property string name: modelData?.name ?? ""
+            readonly property string desc: modelData?.comment ?? ""
+            readonly property string execString: modelData?.execString ?? ""
+            readonly property string wmClass: modelData?.startupClass ?? ""
+            readonly property string genericName: modelData?.genericName ?? ""
+            readonly property string categories: modelData?.categories.join(" ") ?? ""
+            readonly property string keywords: modelData?.keywords.join(" ") ?? ""
         }
     }
 }
