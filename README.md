@@ -363,6 +363,20 @@ Fedora-specific changes on top of the import:
 - zsh replays the scheme's terminal colours on start, so new kitty windows match
   the wallpaper once the desktop has run.
 
+**Taskbar (Shellscape addition):** a bottom dock with the current workspaces,
+pinned apps, other open windows, the tray and a clock. Click an app to open it
+(or jump to it if it's already open), middle-click for a new window, right-click
+to pin or unpin it. Pins are saved to `~/.config/shellscape/shell.json`
+(`dock.pinned`, a list of `.desktop` ids). The original Caelestia bar still
+exists but stays hidden at the left edge until you move the mouse there
+(`bar.persistent` in `shell.json` brings it back).
+
+**Login:** both Hyprland entries work. For the plain "Hyprland" entry,
+`hyprland-session.target` (in `config/systemd/`) starts the systemd graphical
+session that Fedora's desktop portal and polkit agent need; uwsm does that by
+itself. On first install, Fedora's default wallpaper is set and the colour
+scheme is generated from it.
+
 Keybinds (Super = launcher): `Super+T` terminal, `Super+B` browser, `Super+E`
 files, `Super+C` editor, `Super+1…0` workspaces, `Super+Alt+1…0` move window,
 `Super+S` special workspace, `Super+V` clipboard, `Super+.` emoji,

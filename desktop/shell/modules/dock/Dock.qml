@@ -1,0 +1,192 @@
+pragma ComponentBehavior: Bound
+
+import qs.components
+import qs.components.containers
+import qs.services
+import qs.config
+import qs.utils
+import "../launcher/services"
+import Quickshell
+import Quickshell.Wayland
+import Quickshell.Widgets
+import Quickshell.Services.SystemTray
+import QtQuick
+import QtQuick.Layouts
+
+// Bottom taskbar: pinned apps (launch, or focus when already open), other open
+// windows, workspaces, tray and clock. Right-click an app to pin/unpin it,
+// middle-click to open a new window.
+StyledWindow {
+    id: root
+
+    name: "dock"
+    visible: Config.dock.enabled
+    anchors.bottom: true
+    anchors.left: true
+    anchors.right: true
+    implicitHeight: Config.dock.height + Appearance.padding.normal * 2
+    exclusiveZone: implicitHeight
+    WlrLayershell.layer: WlrLayer.Top
+
+    function windowsOf(entry: DesktopEntry): list<var> {
+        return Hyprland.toplevels.values.filter(t => root.matches(t, entry));
+    }
+
+    function matches(toplevel: var, entry: DesktopEntry): bool {
+        const cls = (toplevel.lastIpcObject?.class ?? "").toLowerCase();
+        if (!cls || !entry)
+            return false;
+        return cls === entry.id.toLowerCase() || cls === (entry.startupClass ?? "").toLowerCase() || DesktopEntries.heuristicLookup(cls) === entry;
+    }
+
+    function focus(toplevel: var): void {
+        Hyprland.dispatch(`hl.dsp.focus({ window = "address:0x${toplevel.address}" })`);
+    }
+
+    function setPinned(entry: DesktopEntry, pin: bool): void {
+        if (!entry)
+            return;
+        const ids = Config.dock.pinned.filter(id => id !== entry.id);
+        Config.dock.pinned = pin ? [...ids, entry.id] : ids;
+        Config.save();
+    }
+
+    readonly property list<var> pinnedEntries: Config.dock.pinned.map(id => DesktopEntries.byId(id)).filter(e => e)
+    readonly property list<var> unpinnedWindows: Hyprland.toplevels.values.filter(t => !pinnedEntries.some(e => matches(t, e)))
+
+    StyledRect {
+        id: bar
+
+        anchors.centerIn: parent
+        implicitWidth: layout.implicitWidth + Appearance.padding.large * 2
+        implicitHeight: Config.dock.height
+        radius: Appearance.rounding.full
+        color: Colours.tPalette.m3surfaceContainer
+
+        RowLayout {
+            id: layout
+
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.normal
+
+            // Workspaces of the current group of ten
+            Row {
+                spacing: Appearance.spacing.small
+                Layout.alignment: Qt.AlignVCenter
+
+                Repeater {
+                    model: Config.bar.workspaces.shown
+
+                    StyledRect {
+                        id: ws
+
+                        required property int index
+                        readonly property int wsId: Math.floor((Hyprland.activeWsId - 1) / 10) * 10 + index + 1
+                        readonly property bool active: Hyprland.activeWsId === wsId
+                        readonly property bool occupied: Hyprland.workspaces.values.some(w => w.id === wsId && w.toplevels.values.length > 0)
+
+                        implicitWidth: active ? 28 : 12
+                        implicitHeight: 12
+                        radius: Appearance.rounding.full
+                        color: active ? Colours.palette.m3primary : occupied ? Colours.palette.m3onSurfaceVariant : Colours.palette.m3outlineVariant
+
+                        Behavior on implicitWidth { Anim {} }
+
+                        StateLayer {
+                            function onClicked(): void {
+                                Hyprland.dispatch(`hl.dsp.focus({ workspace = ${ws.wsId} })`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Separator {}
+
+            // Pinned apps
+            Repeater {
+                model: root.pinnedEntries
+
+                DockIcon {
+                    required property DesktopEntry modelData
+
+                    iconSource: Quickshell.iconPath(modelData.icon, "image-missing")
+                    windows: root.windowsOf(modelData)
+                    onActivated: windows.length > 0 ? root.focus(windows[0]) : Apps.launch(modelData)
+                    onLaunchNew: Apps.launch(modelData)
+                    onTogglePin: root.setPinned(modelData, false)
+                }
+            }
+
+            Separator { visible: root.unpinnedWindows.length > 0 }
+
+            // Open windows of apps that aren't pinned
+            Repeater {
+                model: root.unpinnedWindows
+
+                DockIcon {
+                    required property var modelData
+
+                    iconSource: Icons.getAppIcon(modelData.lastIpcObject?.class ?? "", "image-missing")
+                    windows: [modelData]
+                    onActivated: root.focus(modelData)
+                    onLaunchNew: root.focus(modelData)
+                    onTogglePin: root.setPinned(DesktopEntries.heuristicLookup(modelData.lastIpcObject?.class ?? ""), true)
+                }
+            }
+
+            Separator {}
+
+            // Tray
+            Repeater {
+                model: SystemTray.items
+
+                IconImage {
+                    id: tray
+
+                    required property SystemTrayItem modelData
+
+                    implicitSize: Appearance.font.size.larger * 1.4
+                    source: modelData.icon
+                    Layout.alignment: Qt.AlignVCenter
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: event => {
+                            if (event.button === Qt.LeftButton)
+                                tray.modelData.activate();
+                            else if (tray.modelData.hasMenu)
+                                tray.modelData.display(root, root.mapFromItem(tray, 0, 0).x, 0);
+                        }
+                    }
+                }
+            }
+
+            // Clock
+            StyledText {
+                Layout.alignment: Qt.AlignVCenter
+                Layout.leftMargin: Appearance.spacing.small
+                text: Time.format(Config.services.useTwelveHourClock ? "hh:mm A" : "hh:mm")
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.normal
+                color: Colours.palette.m3tertiary
+            }
+        }
+    }
+
+    component Separator: StyledRect {
+        implicitWidth: 2
+        implicitHeight: Config.dock.height * 0.5
+        radius: 1
+        color: Colours.palette.m3outlineVariant
+        Layout.alignment: Qt.AlignVCenter
+    }
+
+    component Anim: NumberAnimation {
+        duration: Appearance.anim.durations.normal
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Appearance.anim.curves.standard
+    }
+}

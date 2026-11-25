@@ -26,6 +26,9 @@ else
 fi
 
 link_dotfile "$CONFIG_DIR/hypr" "$HOME/.config/hypr"
+# Session target so portals + polkit agent also start from the plain "Hyprland" login entry
+link_dotfile "$CONFIG_DIR/systemd/hyprland-session.target" "$HOME/.config/systemd/user/hyprland-session.target"
+systemctl --user daemon-reload 2>/dev/null || true
 link_dotfile "$CONFIG_DIR/uwsm" "$HOME/.config/uwsm"
 link_dotfile "$CONFIG_DIR/thunar/uca.xml" "$HOME/.config/Thunar/uca.xml"
 link_dotfile "$CONFIG_DIR/thunar/thunar-volman.xml" "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar-volman.xml"

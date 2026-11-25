@@ -28,7 +28,8 @@ section "Removing symlinks"
 TARGETS=( "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.config/zsh" "$HOME/.config/kitty"
           "$HOME/.config/fastfetch" "$HOME/.config/tmux" "$HOME/.config/eza" "$HOME/.config/bat"
           "$HOME/.config/hypr" "$HOME/.config/uwsm" "$HOME/.config/quickshell/shellscape" "$HOME/.config/foot"
-          "$HOME/.config/fish" "$HOME/.config/starship.toml" "$HOME/.config/btop" "$HOME/.config/qt5ct" "$HOME/.config/qt6ct" )
+          "$HOME/.config/fish" "$HOME/.config/starship.toml" "$HOME/.config/btop" "$HOME/.config/qt5ct" "$HOME/.config/qt6ct"
+          "$HOME/.config/systemd/user/hyprland-session.target" )
 [[ -f "$LINKS_LIST" ]] && mapfile -t -O "${#TARGETS[@]}" TARGETS <"$LINKS_LIST"
 declare -A SEEN
 for t in "${TARGETS[@]}"; do

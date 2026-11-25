@@ -9,7 +9,7 @@ if pkg_installed quickshell && ! pkg_installed quickshell-git; then
   run_logged "Replacing Fedora quickshell with ${YELLOW}quickshell-git${RESET}" \
     sudo -n dnf swap -y quickshell quickshell-git || die "quickshell swap failed"
 fi
-install_pkgs quickshell-git qt6-qtdeclarative qt6-qtsvg qt6-qtimageformats \
+install_pkgs ImageMagick quickshell-git qt6-qtdeclarative qt6-qtsvg qt6-qtimageformats \
   cava aubio libqalculate ddcutil brightnessctl NetworkManager lm_sensors swappy grim \
   gcc-c++ pkgconf-pkg-config pipewire-devel aubio-devel wayland-devel wayland-protocols-devel
 
@@ -59,4 +59,15 @@ run_logged "Rebuilding font cache" fc-cache -f
 
 link_dotfile "$SHELL_SRC" "$HOME/.config/quickshell/shellscape"
 mkdir -p "$HOME/Pictures/Wallpapers"
+# First run: start from Fedora's own wallpaper so the desktop (and its colour scheme) isn't blank.
+DEFAULT_WALL="$HOME/Pictures/Wallpapers/fedora-default.jpg"
+SRC_WALL=/usr/share/backgrounds/images/default-dark.jxl
+if [[ ! -s "$HOME/.local/state/shellscape/wallpaper/path.txt" && -e "$SRC_WALL" ]]; then
+  [[ -s "$DEFAULT_WALL" ]] || run_logged "Converting Fedora's default wallpaper" magick "$SRC_WALL" -resize 3840x3840 -quality 92 "$DEFAULT_WALL"
+  if [[ -s "$DEFAULT_WALL" ]] && shellscape wallpaper -f "$DEFAULT_WALL" >>"$LOG" 2>&1; then
+    ok "Wallpaper → $DEFAULT_WALL (colour scheme generated from it)"
+  else
+    warn "Could not set a default wallpaper; pick one later with: shellscape wallpaper -f <image>"
+  fi
+fi
 ok "Wallpapers folder: ~/Pictures/Wallpapers (pick one with Super → '>wallpaper' or: shellscape wallpaper -f <file>)"

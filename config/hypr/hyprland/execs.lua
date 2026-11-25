@@ -1,7 +1,12 @@
 hl.on("hyprland.start", function()
-    -- Keyring and auth
+    -- systemd session: Fedora's xdg-desktop-portal and hyprpolkitagent only run inside
+    -- graphical-session.target, which the plain "Hyprland" login entry never starts (uwsm does).
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP HYPRLAND_INSTANCE_SIGNATURE"
+        .. " && systemctl --user start hyprland-session.target"
+        .. " && systemctl --user start xdg-desktop-portal-hyprland xdg-desktop-portal hyprpolkitagent")
+
+    -- Keyring
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")  -- polkit-gnome is not packaged for Fedora
 
     -- Clipboard history
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
@@ -30,4 +35,9 @@ hl.on("hyprland.start", function()
 
     -- Idle daemon
     hl.exec_cmd("hypridle")
+end)
+
+-- Leave graphical-session.target so the next login starts its services fresh.
+hl.on("hyprland.shutdown", function()
+    hl.exec_cmd("systemctl --user stop hyprland-session.target")
 end)

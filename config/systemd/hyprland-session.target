@@ -1,0 +1,9 @@
+# Shellscape: lets the plain "Hyprland" login entry start graphical-session.target,
+# which Fedora's xdg-desktop-portal and hyprpolkitagent require.
+# Started by config/hypr/hyprland/execs.lua; uwsm sessions already have the target.
+[Unit]
+Description=Hyprland session (Shellscape)
+Documentation=man:systemd.special(7)
+BindsTo=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target

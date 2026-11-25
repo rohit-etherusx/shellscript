@@ -22,8 +22,16 @@ Singleton {
     property alias lock: adapter.lock
     property alias services: adapter.services
     property alias paths: adapter.paths
+    property alias dock: adapter.dock
+
+    // Shellscape: write the current settings back to shell.json (used by the dock's pin/unpin).
+    function save(): void {
+        file.writeAdapter();
+    }
 
     FileView {
+        id: file
+
         path: `${Paths.stringify(Paths.config)}/shell.json`
         watchChanges: true
         onFileChanged: reload()
@@ -46,6 +54,7 @@ Singleton {
             property LockConfig lock: LockConfig {}
             property ServiceConfig services: ServiceConfig {}
             property UserPaths paths: UserPaths {}
+            property DockConfig dock: DockConfig {}
         }
     }
 }

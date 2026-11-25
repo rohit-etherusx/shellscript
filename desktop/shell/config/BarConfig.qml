@@ -1,7 +1,7 @@
 import Quickshell.Io
 
 JsonObject {
-    property bool persistent: true
+    property bool persistent: false  // Shellscape: hidden until hovered; the dock is the taskbar
     property bool showOnHover: true
     property int dragThreshold: 20
     property Workspaces workspaces: Workspaces {}
