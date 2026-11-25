@@ -67,12 +67,18 @@ run_logged() {
     "$@" >>"$LOG" 2>&1
     return
   fi
+  # The spinner line must fit on one row: a wrapped line can't be redrawn with \r
+  # and would print a new copy every frame. Strip colours, cut to terminal width.
+  local plain cols
+  plain="$(printf '%s' "$label" | sed 's/\x1b\[[0-9;]*m//g; s/\x1b(B//g')"
+  cols="$(tput cols 2>/dev/null || echo 80)"
+  (( ${#plain} > cols - 12 )) && plain="${plain:0:$((cols - 15))}..."
   "$@" >>"$LOG" 2>&1 &
   local pid=$! i=0 rc=0
   local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
   tput civis 2>/dev/null || true
   while kill -0 "$pid" 2>/dev/null; do
-    printf '\r%s %s %s' "$NOTE" "$label" "${frames:$((i++ % 10)):1}"
+    printf '\r\033[K%s %s %s' "$NOTE" "$plain" "${frames:$((i++ % 10)):1}"
     sleep 0.15
   done
   wait "$pid" || rc=$?
