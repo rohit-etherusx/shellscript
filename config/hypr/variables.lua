@@ -44,6 +44,7 @@ V = {
     windowBorderSize = 3,
 
     -- Misc
+    nightLight  = true,  -- gammastep: warmer screen after sunset (uses your location)
     volumeStep  = 10,  -- In percent
     cursorTheme = "breeze_cursors",  -- sweet-cursors is not packaged for Fedora
     cursorSize  = 24,

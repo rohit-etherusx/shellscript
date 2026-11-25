@@ -22,7 +22,7 @@ hl.on("hyprland.start", function()
 
     -- Location provider and night light
     hl.exec_cmd("/usr/libexec/geoclue-2.0/demos/agent")
-    hl.exec_cmd("sleep 1 && gammastep")
+    if V.nightLight then hl.exec_cmd("sleep 1 && gammastep") end
 
     -- Forward bluetooth media commands to MPRIS
     hl.exec_cmd("mpris-proxy")

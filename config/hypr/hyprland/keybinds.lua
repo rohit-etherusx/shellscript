@@ -2,7 +2,20 @@
 -- Hyprland only allows the catch-all bind (launcherInterrupt) inside a submap.
 hl.define_submap("global", function()
 local d = hl.dsp
-local function bind(keys, dsp, opts) hl.bind(keys, dsp, opts) end
+local launcherInterrupt = hl.dsp.global("shellscape:launcherInterrupt")
+
+-- Tapping Super alone opens the launcher; any Super shortcut must cancel that first.
+-- (The catch-all below only fires for keys that have no bind of their own.)
+local function bind(keys, dsp, opts)
+    if keys:find("Super") and not (opts and opts.mouse) and keys ~= "Super + Super_L" then
+        local action = dsp
+        dsp = function()
+            hl.dispatch(launcherInterrupt)
+            if type(action) == "function" then action() else hl.dispatch(action) end
+        end
+    end
+    hl.bind(keys, dsp, opts)
+end
 local function exec(cmd) return d.exec_cmd(cmd) end
 local function app(cmd) return d.exec_cmd("app2unit -- " .. cmd) end
 local function global(name) return d.global("shellscape:" .. name) end
