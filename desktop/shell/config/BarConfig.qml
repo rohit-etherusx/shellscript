@@ -1,8 +1,9 @@
 import Quickshell.Io
 
 JsonObject {
-    property bool persistent: false  // Shellscape: hidden until hovered; the dock is the taskbar
-    property bool showOnHover: true
+    // Shellscape: the left bar is off; modules/dock is the bottom bar. Set both true to bring it back.
+    property bool persistent: false
+    property bool showOnHover: false
     property int dragThreshold: 20
     property Workspaces workspaces: Workspaces {}
     property Tray tray: Tray {}

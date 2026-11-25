@@ -6,6 +6,8 @@ import qs.services
 import qs.config
 import qs.utils
 import "../launcher/services"
+import qs.components.effects
+import qs.modules.controlcenter
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
@@ -15,8 +17,9 @@ import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
 
-// Bottom taskbar: pinned apps (launch, or focus when already open), other open
-// windows, workspaces, tray and clock. Right-click an app to pin/unpin it,
+// Shellscape's single bottom bar (replaces Caelestia's left bar): logo + workspaces,
+// pinned apps and open windows in the centre, tray / network / bluetooth / battery /
+// clock / power on the right. Right-click an app to pin/unpin it,
 // middle-click to open a new window.
 StyledWindow {
     id: root
@@ -45,6 +48,13 @@ StyledWindow {
         Hyprland.dispatch(`hl.dsp.focus({ window = "address:0x${toplevel.address}" })`);
     }
 
+    // Open/close a drawer (dashboard, session, ...) on the monitor this bar is on
+    function toggle(drawer: string): void {
+        const v = Visibilities.screens.get(Hyprland.monitorFor(screen));
+        if (v)
+            v[drawer] = !v[drawer];
+    }
+
     function setPinned(entry: DesktopEntry, pin: bool): void {
         if (!entry)
             return;
@@ -64,19 +74,32 @@ StyledWindow {
     StyledRect {
         id: bar
 
-        anchors.centerIn: parent
-        implicitWidth: layout.implicitWidth + Appearance.padding.large * 2
-        implicitHeight: Config.dock.height
+        anchors.fill: parent
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        anchors.topMargin: Appearance.padding.normal
+        anchors.bottomMargin: Appearance.padding.normal
         radius: Appearance.rounding.full
         color: Colours.tPalette.m3surfaceContainer
 
+        // ── Left: logo (dashboard) + workspaces ──────────────────────────────
         RowLayout {
-            id: layout
-
-            anchors.centerIn: parent
+            anchors.left: parent.left
+            anchors.leftMargin: Appearance.padding.large
+            anchors.verticalCenter: parent.verticalCenter
             spacing: Appearance.spacing.normal
 
-            // Workspaces of the current group of ten
+            Clickable {
+                onClicked: root.toggle("dashboard")
+
+                ColouredIcon {
+                    anchors.centerIn: parent
+                    source: SysInfo.osLogo
+                    implicitSize: Appearance.font.size.large * 1.2
+                    colour: Colours.palette.m3tertiary
+                }
+            }
+
             Row {
                 spacing: Appearance.spacing.small
                 Layout.alignment: Qt.AlignVCenter
@@ -107,10 +130,13 @@ StyledWindow {
                     }
                 }
             }
+        }
 
-            Separator {}
+        // ── Centre: pinned apps + other open windows ─────────────────────────
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.small
 
-            // Pinned apps
             Repeater {
                 model: root.pinnedEntries
 
@@ -127,7 +153,6 @@ StyledWindow {
 
             Separator { visible: root.unpinnedWindows.length > 0 }
 
-            // Open windows of apps that aren't pinned
             Repeater {
                 model: root.unpinnedWindows
 
@@ -141,10 +166,15 @@ StyledWindow {
                     onTogglePin: root.setPinned(DesktopEntries.heuristicLookup(modelData.lastIpcObject?.class ?? ""), true)
                 }
             }
+        }
 
-            Separator {}
+        // ── Right: tray, status, clock, power ────────────────────────────────
+        RowLayout {
+            anchors.right: parent.right
+            anchors.rightMargin: Appearance.padding.large
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: Appearance.spacing.normal
 
-            // Tray
             Repeater {
                 model: SystemTray.items
 
@@ -171,19 +201,26 @@ StyledWindow {
                 }
             }
 
-            // Status: network, bluetooth, battery (same logic as the Caelestia bar's StatusIcons)
-            MaterialIcon {
-                Layout.alignment: Qt.AlignVCenter
-                animate: true
-                text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
-                color: Colours.palette.m3secondary
+            Clickable {
+                onClicked: WindowFactory.create(null, { active: "network" })
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    animate: true
+                    text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
+                    color: Colours.palette.m3secondary
+                }
             }
 
-            MaterialIcon {
-                Layout.alignment: Qt.AlignVCenter
-                animate: true
-                text: !Bluetooth.defaultAdapter?.enabled ? "bluetooth_disabled" : Bluetooth.devices.values.some(d => d.connected) ? "bluetooth_connected" : "bluetooth"
-                color: Colours.palette.m3secondary
+            Clickable {
+                onClicked: WindowFactory.create(null, { active: "bluetooth" })
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    animate: true
+                    text: !Bluetooth.defaultAdapter?.enabled ? "bluetooth_disabled" : Bluetooth.devices.values.some(d => d.connected) ? "bluetooth_connected" : "bluetooth"
+                    color: Colours.palette.m3secondary
+                }
             }
 
             Row {
@@ -216,14 +253,48 @@ StyledWindow {
                 }
             }
 
-            // Clock
-            StyledText {
-                Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: Appearance.spacing.small
-                text: Time.format(Config.services.useTwelveHourClock ? "hh:mm A" : "hh:mm")
-                font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.normal
-                color: Colours.palette.m3tertiary
+            Clickable {
+                implicitWidth: clock.implicitWidth + Appearance.padding.normal * 2
+                onClicked: root.toggle("dashboard")
+
+                StyledText {
+                    id: clock
+
+                    anchors.centerIn: parent
+                    text: Time.format(Config.services.useTwelveHourClock ? "hh:mm A" : "hh:mm")
+                    font.family: Appearance.font.family.mono
+                    font.pointSize: Appearance.font.size.normal
+                    color: Colours.palette.m3tertiary
+                }
+            }
+
+            Clickable {
+                onClicked: root.toggle("session")
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    text: "power_settings_new"
+                    color: Colours.palette.m3error
+                    font.bold: true
+                }
+            }
+        }
+    }
+
+    // Round hover/click target for the icons in the bar
+    component Clickable: Item {
+        id: clickable
+
+        signal clicked
+
+        implicitWidth: Config.dock.height * 0.7
+        implicitHeight: Config.dock.height * 0.7
+        Layout.alignment: Qt.AlignVCenter
+
+        StateLayer {
+            radius: Appearance.rounding.full
+            function onClicked(): void {
+                clickable.clicked();
             }
         }
     }
