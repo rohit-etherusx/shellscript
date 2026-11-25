@@ -129,7 +129,7 @@ Item {
                 DockIcon {
                     required property DesktopEntry modelData
 
-                    iconSource: Quickshell.iconPath(modelData.icon, "image-missing")
+                    iconSource: Quickshell.iconPath(modelData?.icon ?? "", "image-missing")  // null while desktop files reload
                     windows: root.windowsOf(modelData)
                     onActivated: windows.length > 0 ? root.focus(windows[0]) : Apps.launch(modelData)
                     onLaunchNew: Apps.launch(modelData)
