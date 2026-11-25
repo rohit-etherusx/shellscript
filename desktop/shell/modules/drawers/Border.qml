@@ -38,6 +38,7 @@ Item {
             anchors.fill: parent
             anchors.margins: Config.border.thickness
             anchors.leftMargin: root.bar.implicitWidth
+            anchors.bottomMargin: Config.bottomInset
             radius: Config.border.rounding
         }
     }

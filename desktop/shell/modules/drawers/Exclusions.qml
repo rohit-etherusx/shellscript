@@ -26,6 +26,7 @@ Scope {
 
     ExclusionZone {
         anchors.bottom: true
+        exclusiveZone: Config.bottomInset
     }
 
     component ExclusionZone: StyledWindow {

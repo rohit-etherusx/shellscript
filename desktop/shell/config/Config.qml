@@ -24,6 +24,9 @@ Singleton {
     property alias paths: adapter.paths
     property alias dock: adapter.dock
 
+    // Shellscape: the bottom bar is the frame's bottom edge, so it replaces the border there.
+    readonly property int bottomInset: dock.enabled ? dock.height : border.thickness
+
     // Shellscape: write the current settings back to shell.json (used by the dock's pin/unpin).
     function save(): void {
         file.writeAdapter();

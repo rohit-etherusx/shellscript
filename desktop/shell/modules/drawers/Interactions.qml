@@ -44,7 +44,7 @@ CustomMouseArea {
     }
 
     function inBottomPanel(panel: Item, x: real, y: real): bool {
-        return y > root.height - Config.border.thickness - panel.height - Config.border.rounding && withinPanelWidth(panel, x, y);
+        return y > root.height - Config.bottomInset - panel.height - Config.border.rounding && withinPanelWidth(panel, x, y);
     }
 
     function onWheel(event: WheelEvent): void {

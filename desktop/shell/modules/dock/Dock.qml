@@ -9,7 +9,6 @@ import "../launcher/services"
 import qs.components.effects
 import qs.modules.controlcenter
 import Quickshell
-import Quickshell.Wayland
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
@@ -21,17 +20,11 @@ import QtQuick.Layouts
 // pinned apps and open windows in the centre, tray / network / bluetooth / battery /
 // clock / power on the right. Right-click an app to pin/unpin it,
 // middle-click to open a new window.
-StyledWindow {
+Item {
     id: root
 
-    name: "dock"
-    visible: Config.dock.enabled
-    anchors.bottom: true
-    anchors.left: true
-    anchors.right: true
-    implicitHeight: Config.dock.height + Appearance.padding.normal * 2
-    exclusiveZone: implicitHeight
-    WlrLayershell.layer: WlrLayer.Top
+    required property ShellScreen screen
+    required property PersistentProperties visibilities
 
     function windowsOf(entry: DesktopEntry): list<var> {
         return Hyprland.toplevels.values.filter(t => root.matches(t, entry));
@@ -50,9 +43,7 @@ StyledWindow {
 
     // Open/close a drawer (dashboard, session, ...) on the monitor this bar is on
     function toggle(drawer: string): void {
-        const v = Visibilities.screens.get(Hyprland.monitorFor(screen));
-        if (v)
-            v[drawer] = !v[drawer];
+        visibilities[drawer] = !visibilities[drawer];
     }
 
     function setPinned(entry: DesktopEntry, pin: bool): void {
@@ -71,21 +62,16 @@ StyledWindow {
     }
     readonly property list<var> unpinnedWindows: Hyprland.toplevels.values.filter(t => !pinnedEntries.some(e => matches(t, e)))
 
-    StyledRect {
+    // No background of its own: the frame (Border.qml) paints this strip, so the bar is part of it.
+    Item {
         id: bar
 
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.normal
-        anchors.rightMargin: Appearance.padding.normal
-        anchors.topMargin: Appearance.padding.normal
-        anchors.bottomMargin: Appearance.padding.normal
-        radius: Appearance.rounding.full
-        color: Colours.tPalette.m3surfaceContainer
 
         // ── Left: logo (dashboard) + workspaces ──────────────────────────────
         RowLayout {
             anchors.left: parent.left
-            anchors.leftMargin: Appearance.padding.large
+            anchors.leftMargin: Config.border.rounding
             anchors.verticalCenter: parent.verticalCenter
             spacing: Appearance.spacing.normal
 
@@ -171,7 +157,7 @@ StyledWindow {
         // ── Right: tray, status, clock, power ────────────────────────────────
         RowLayout {
             anchors.right: parent.right
-            anchors.rightMargin: Appearance.padding.large
+            anchors.rightMargin: Config.border.rounding
             anchors.verticalCenter: parent.verticalCenter
             spacing: Appearance.spacing.normal
 
@@ -195,7 +181,7 @@ StyledWindow {
                             if (event.button === Qt.LeftButton)
                                 tray.modelData.activate();
                             else if (tray.modelData.hasMenu)
-                                tray.modelData.display(root, root.mapFromItem(tray, 0, 0).x, 0);
+                                tray.modelData.display(QsWindow.window, tray.mapToItem(null, 0, 0).x, tray.mapToItem(null, 0, 0).y);
                         }
                     }
                 }

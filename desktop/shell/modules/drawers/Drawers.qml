@@ -5,6 +5,7 @@ import qs.components.containers
 import qs.services
 import qs.config
 import qs.modules.bar
+import qs.modules.dock
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -36,7 +37,7 @@ Variants {
                 x: bar.implicitWidth
                 y: Config.border.thickness
                 width: win.width - bar.implicitWidth - Config.border.thickness
-                height: win.height - Config.border.thickness * 2
+                height: win.height - Config.border.thickness - Config.bottomInset
                 intersection: Intersection.Xor
 
                 regions: regions.instances
@@ -144,6 +145,17 @@ Variants {
                     visibilities: visibilities
                     popouts: panels.popouts
                 }
+            }
+
+            Dock {
+                visible: Config.dock.enabled
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: Config.bottomInset
+
+                screen: scope.modelData
+                visibilities: visibilities
             }
         }
     }

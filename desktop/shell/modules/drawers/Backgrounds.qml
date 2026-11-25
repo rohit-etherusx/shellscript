@@ -18,6 +18,7 @@ Shape {
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
+    anchors.bottomMargin: Config.bottomInset
     anchors.leftMargin: bar.implicitWidth
     preferredRendererType: Shape.CurveRenderer
 

@@ -27,6 +27,7 @@ Item {
     anchors.fill: parent
     anchors.margins: Config.border.thickness
     anchors.leftMargin: bar.implicitWidth
+    anchors.bottomMargin: Config.bottomInset
 
     Osd.Wrapper {
         id: osd
