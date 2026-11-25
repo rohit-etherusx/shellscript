@@ -9,6 +9,14 @@ you can run, skip or re-run individually.
 
 ![Shellscape on Fedora KDE: Pokémon sprite, fastfetch and the shellscape prompt in Ptyxis](docs/screenshot.png)
 
+### Hyprland desktop
+
+![Shellscape Hyprland desktop: wallpaper with the bottom taskbar (workspaces, pinned apps, status, clock)](docs/desktop.png)
+
+![Two kitty terminals side by side: Pokémon sprite with fastfetch on the left, wallpaper-coloured theme](docs/desktop-terminal.png)
+
+![The dashboard drawer over Thunar: weather, system info, clock, calendar, resource meters and media player](docs/desktop-dashboard.png)
+
 ```bash
 git clone git@github.com:rohit-etherusx/shellscript.git ~/projects/linux-ricing/Shellscape
 cd ~/projects/linux-ricing/Shellscape
