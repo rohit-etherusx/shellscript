@@ -9,6 +9,7 @@ set -euo pipefail
 SHELLSCAPE_DIR="${SHELLSCAPE_DIR:-$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)}"
 export SHELLSCAPE_DIR
 CONFIG_DIR="$SHELLSCAPE_DIR/config"
+DESKTOP_DIR="$SHELLSCAPE_DIR/desktop"   # Quickshell shell + Python CLI (imported by tools/absorb.sh)
 LOG_DIR="$SHELLSCAPE_DIR/logs"
 BUILD_DIR="$SHELLSCAPE_DIR/build"
 VENDOR_DIR="$SHELLSCAPE_DIR/vendor"   # offline copies of everything not in dnf (see vendor.sh)
@@ -66,12 +67,18 @@ run_logged() {
     "$@" >>"$LOG" 2>&1
     return
   fi
+  # The spinner line must fit on one row: a wrapped line can't be redrawn with \r
+  # and would print a new copy every frame. Strip colours, cut to terminal width.
+  local plain cols
+  plain="$(printf '%s' "$label" | sed 's/\x1b\[[0-9;]*m//g; s/\x1b(B//g')"
+  cols="$(tput cols 2>/dev/null || echo 80)"
+  (( ${#plain} > cols - 12 )) && plain="${plain:0:$((cols - 15))}..."
   "$@" >>"$LOG" 2>&1 &
   local pid=$! i=0 rc=0
   local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
   tput civis 2>/dev/null || true
   while kill -0 "$pid" 2>/dev/null; do
-    printf '\r%s %s %s' "$NOTE" "$label" "${frames:$((i++ % 10)):1}"
+    printf '\r\033[K%s %s %s' "$NOTE" "$plain" "${frames:$((i++ % 10)):1}"
     sleep 0.15
   done
   wait "$pid" || rc=$?
@@ -107,6 +114,15 @@ install_pkgs() {
     error "Failed to install: ${failed[*]} (see $LOG)"
     return 1
   fi
+}
+
+# enable_copr owner/project  → `dnf copr enable` once (needs dnf5-plugins / dnf-plugins-core)
+enable_copr() {
+  if dnf copr list 2>/dev/null | grep "/$1\b" >/dev/null && ! dnf copr list 2>/dev/null | grep "/$1 (disabled)" >/dev/null; then
+    info "COPR $1 already enabled"; return 0
+  fi
+  run_logged "Enabling COPR ${YELLOW}$1${RESET}" sudo -n dnf copr enable -y "$1" \
+    && ok "Enabled COPR $1"
 }
 
 # ── Dotfiles ──────────────────────────────────────────────────────────────────

@@ -1,7 +1,9 @@
 # Shellscape
 
-One-command terminal ricing for **Fedora KDE**. Built and tested on Fedora 43
-with Plasma 6.7. Everything is themed in **Catppuccin Mocha**, every config file
+One-command terminal ricing **and a full Hyprland desktop** for **Fedora**.
+The terminal half was built and tested on Fedora 43 KDE (Plasma 6.7); the
+desktop half (Hyprland + the Quickshell-based Shellscape shell) targets Fedora 45
+and installs *next to* KDE — pick it at the login screen. Everything is themed in **Catppuccin Mocha**, every config file
 lives inside this folder, and the installer is a set of small idempotent modules
 you can run, skip or re-run individually.
 
@@ -13,7 +15,8 @@ cd ~/projects/linux-ricing/Shellscape
 ./install.sh
 ```
 
-Log out and back in (or `exec zsh`), press **Ctrl+Alt+T**, done.
+Log out and back in (or `exec zsh`), press **Ctrl+Alt+T**, done. For the
+desktop, log out and choose **Hyprland (uwsm-managed)** at the login screen.
 
 ---
 
@@ -29,6 +32,11 @@ Log out and back in (or `exec zsh`), press **Ctrl+Alt+T**, done.
 | **tmux** | `Ctrl-a` prefix, mouse, vi keys, Catppuccin status bar, TPM with sensible / yank / resurrect |
 | **Desktop** | KDE effects: glide open/close, wobbly windows, magic-lamp minimize, blur, translucency while moving, dimmed dialog parents |
 | **Fonts** | JetBrainsMono Nerd Font plus Fedora's JetBrains Mono, Fira Code, Source Code Pro, Noto, Noto Emoji, Font Awesome |
+| **Hyprland desktop** | Hyprland with blur, shadows, animations, workspace groups, special workspaces (sysmon / music / communication / todo), hypridle auto-lock, uwsm session, clipboard history, screenshots & screen recording |
+| **Shellscape shell** | Quickshell desktop: bar, app launcher (tap `Super`), dashboard with media/weather/calendar, notifications, OSDs, lock screen (password + fingerprint), session menu, wallpaper picker, audio-visualiser |
+| **`shellscape` CLI** | Material You colour schemes generated from your wallpaper and pushed live to the shell, Hyprland borders, kitty/foot (open terminals recolour instantly), GTK, Qt, btop, fuzzel, cava, htop, nvtop, Spotify, Discord, VS Code |
+| **Extra terminal stack** | foot + fish + starship from Caelestia, themed by the scheme; zsh + kitty stay the defaults |
+| **Optional apps** | `--with vscode`, `--with browser` (Firefox/Zen userChrome + CaelestiaFox), `--with spotify` (Spicetify), `--with discord` (Vesktop) |
 
 Everything is a symlink from `~` back into `config/`, so editing a file here
 changes the live config immediately.
@@ -93,14 +101,23 @@ Shellscape/
 ├── PACKAGES.md         every dependency and where it comes from
 ├── docs/               screenshot
 ├── lib/common.sh       shared helpers: logging, dnf, backup+symlink, git clone, download, vendor
-├── modules/            one self-contained, idempotent step each (NN-name.sh)
+├── modules/            one self-contained, idempotent step each (NN-name.sh; "# optional" ones need --with)
+├── desktop/
+│   ├── shell/          Quickshell QML desktop  → ~/.config/quickshell/shellscape
+│   ├── cli/            Python `shellscape` CLI (built into a wheel, installed system-wide)
+│   └── UPSTREAM        exact upstream commits that were imported
+├── tools/absorb.sh     re-imports + rebrands the upstream Caelestia repos (see "Desktop")
+├── tests/selection.sh  self-check for --skip/--only/--with
 ├── config/             the source of truth, symlinked into ~
 │   ├── zsh/            .zshrc  .zprofile  aliases.zsh  colors.zsh  themes/*.zsh-theme
 │   ├── kitty/          kitty.conf  theme.conf (Catppuccin Mocha)
 │   ├── fastfetch/      config.jsonc  config-v2  config-compact  config-pokemon  fedora.png
 │   ├── tmux/           tmux.conf  plugins/ (populated by TPM at install time)
 │   ├── eza/            theme.yml
-│   └── bat/            config
+│   ├── bat/            config
+│   ├── hypr/           hyprland.lua, variables.lua (apps, gaps, blur, keyboard), hyprland/*.lua, hypridle.conf
+│   ├── uwsm/ foot/ fish/ starship.toml btop/ micro/ qt5ct/ qt6ct/ thunar/
+│   └── vscode/ firefox/ zen/ spicetify/ zed/     used by the optional modules
 ├── vendor/             compressed copies: Nerd Font, Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts (~16 MB)
 ├── logs/               install logs, links.list, backups.list      (gitignored)
 └── build/              downloaded zips and cloned sources           (gitignored)
@@ -120,7 +137,16 @@ to `<name>.bak.<timestamp>` and put back by `./uninstall.sh`.
 ~/.config/tmux       → config/tmux
 ~/.config/eza        → config/eza
 ~/.config/bat        → config/bat
+~/.config/hypr       → config/hypr          ~/.config/uwsm  → config/uwsm
+~/.config/quickshell/shellscape → desktop/shell
+~/.config/foot ~/.config/fish ~/.config/starship.toml ~/.config/btop
+~/.config/micro ~/.config/qt5ct ~/.config/qt6ct  → config/…
 ```
+
+Per-machine Hyprland overrides go in `~/.config/shellscape/hypr-vars.lua`
+(variables, e.g. `V.browser = "brave-browser"`, `V.kbLayout = "de"`) and
+`~/.config/shellscape/hypr-user.lua` (any Hyprland Lua config, e.g. `hl.monitor{…}`). Shell settings live in `~/.config/shellscape/shell.json`.
+None of these are inside the repo.
 
 Settings that are not files (Ptyxis font and palette, KDE default terminal, the
 `Ctrl+Alt+T` shortcut, KWin effects) are written with `gsettings`,
@@ -300,10 +326,72 @@ nothing to do.
 
 ---
 
+## Desktop
+
+The desktop is an absorbed, rebranded copy of the Fedora fork of the Caelestia
+dots. `tools/absorb.sh` copies the three upstream repos (cloned next to this
+folder) into `desktop/` and `config/`, renames every `caelestia` identifier to
+`shellscape` (command, Python package, Quickshell config name, IPC/shortcut ids,
+`~/.config|.local/state|.cache/shellscape`, theme files, the VS Code extension),
+and fails if anything is left over. Deliberately unchanged: upstream credit URLs
+and the `caelestiafox` native-messaging id, which the published Firefox add-on
+looks for by name.
+
+Fedora-specific changes on top of the import:
+
+- Hyprland 0.57 dropped the hyprlang `.conf` format and the old
+  `dispatch <name> <args>` syntax. The whole Hyprland config is ported to Lua
+  (`config/hypr/hyprland.lua` + `hyprland/*.lua`, checked with
+  `Hyprland --verify-config`); the shell's QML and the CLI send Lua dispatchers
+  (`hl.dsp.focus({ workspace = 3 })`); the CLI writes the colour scheme as
+  `scheme/current.lua` and reloads Hyprland; `wsaction.fish` is replaced by Lua
+  callbacks; the fork author's French keyboard layout is now `us` (`V.kbLayout`).
+- Hyprland, hypridle, hyprpicker, hyprpolkitagent, uwsm come from the
+  `sdegler/hyprland` COPR (Fedora 45 dropped Hyprland); Quickshell from
+  `errornointernet/quickshell` (`quickshell-git`, as the shell requires); starship from `atim/starship`.
+- `app2unit` is built from source; the shell's two native helpers
+  (`beat_detector`, `inhibit_idle`) are compiled into `/usr/lib/shellscape/`
+  (upstream's Fedora installer never built `inhibit_idle`).
+- Polkit agent → `hyprpolkitagent`; geoclue agent path → `/usr/libexec`;
+  `sway-audio-idle-inhibit` (not packaged) dropped; cursor → `breeze_cursors`.
+- Default apps: kitty (terminal), VS Code, Thunar; the browser is auto-detected
+  into `hypr-vars.lua`. Removed the fork author's personal Flameshot/Zen bindings.
+- The CLI skips Discord theming when Dart Sass is missing (`--with discord`
+  installs it) instead of
+  crashing when no Sass compiler exists (upstream aborted the whole theme run,
+  so GTK/Qt/btop never got recoloured).
+- zsh replays the scheme's terminal colours on start, so new kitty windows match
+  the wallpaper once the desktop has run.
+
+**Bottom bar (replaces Caelestia's left bar):** one full-width bar. Left: Fedora
+logo (opens the dashboard) and workspaces. Centre: pinned apps and other open
+windows; click to open or jump to an app, middle-click for a new window,
+right-click to pin or unpin (saved to `~/.config/shellscape/shell.json`,
+`dock.pinned`). Right: tray, Wi-Fi and Bluetooth (open the control center),
+battery, clock (dashboard) and power (session menu). The left bar is switched
+off; set `bar.persistent` to `true` in `shell.json` to bring it back.
+
+**Login:** both Hyprland entries work. For the plain "Hyprland" entry,
+`hyprland-session.target` (in `config/systemd/`) starts the systemd graphical
+session that Fedora's desktop portal and polkit agent need; uwsm does that by
+itself. On first install, Fedora's default wallpaper is set and the colour
+scheme is generated from it.
+
+Keybinds (Super = launcher): `Super+T` terminal, `Super+B` browser, `Super+E`
+files, `Super+C` editor, `Super+1…0` workspaces, `Super+Alt+1…0` move window,
+`Super+S` special workspace, `Super+V` clipboard, `Super+.` emoji,
+`Super+Shift+S` region screenshot, `Super+Alt+R` record, `Super+L` lock,
+`Ctrl+Alt+Del` session menu, `Ctrl+Super+Alt+R` restart the shell. The full
+list is `config/hypr/hyprland/keybinds.lua`.
+
 ## Credits
 
 - Colours: [Catppuccin Mocha](https://github.com/catppuccin)
 - Sprites: [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
 - Font: [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) build of JetBrains Mono
+- Desktop: [caelestia-dots](https://github.com/caelestia-dots) by soramane and the
+  [Fedora fork](https://github.com/EnceladusII/caelestia-fedora) by EnceladusII —
+  shell and CLI are GPL-3.0; their `LICENSE` files are kept in `desktop/shell`
+  and `desktop/cli`, and Shellscape's desktop part is GPL-3.0 as a result.
 - Shell framework: [Oh-My-Zsh](https://ohmyz.sh) and the
   [zsh-users](https://github.com/zsh-users) plugins

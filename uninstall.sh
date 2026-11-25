@@ -26,7 +26,10 @@ done
 section "Removing symlinks"
 # Known targets (fallback if links.list is missing) + whatever install recorded
 TARGETS=( "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.config/zsh" "$HOME/.config/kitty"
-          "$HOME/.config/fastfetch" "$HOME/.config/tmux" "$HOME/.config/eza" "$HOME/.config/bat" )
+          "$HOME/.config/fastfetch" "$HOME/.config/tmux" "$HOME/.config/eza" "$HOME/.config/bat"
+          "$HOME/.config/hypr" "$HOME/.config/uwsm" "$HOME/.config/quickshell/shellscape" "$HOME/.config/foot"
+          "$HOME/.config/fish" "$HOME/.config/starship.toml" "$HOME/.config/btop" "$HOME/.config/qt5ct" "$HOME/.config/qt6ct"
+          "$HOME/.config/systemd/user/hyprland-session.target" )
 [[ -f "$LINKS_LIST" ]] && mapfile -t -O "${#TARGETS[@]}" TARGETS <"$LINKS_LIST"
 declare -A SEEN
 for t in "${TARGETS[@]}"; do
@@ -36,8 +39,9 @@ for t in "${TARGETS[@]}"; do
   fi
 done
 
-DESK="$HOME/.local/share/applications/kitty.desktop"
-if grep -qs 'X-Shellscape' "$DESK"; then rm -f "$DESK"; ok "Removed $DESK"; fi
+for DESK in "$HOME/.local/share/applications/kitty.desktop" "$HOME/.local/share/applications/org.gnome.Settings.desktop"; do
+  if grep -qs 'X-Shellscape' "$DESK"; then rm -f "$DESK"; ok "Removed $DESK"; fi
+done
 
 section "Restoring backups"
 if [[ -f "$BACKUPS_LIST" ]]; then
@@ -69,6 +73,23 @@ if [[ $PURGE == 1 ]]; then
   PKGS=(zsh zsh-autosuggestions zsh-syntax-highlighting kitty fastfetch chafa fzf eza bat zoxide ripgrep fd-find tmux)
   if ask_yes_no "dnf remove: ${PKGS[*]} ?" n; then
     sudo dnf remove -y "${PKGS[@]}" 2>&1 | tee -a "$LOG" && ok "Packages removed"
+  fi
+  # Desktop (Hyprland + Shellscape shell/CLI)
+  if ask_yes_no "Remove the shellscape CLI, /usr/lib/shellscape helpers and desktop fonts?" y; then
+    sudo python3 -m pip uninstall -y --break-system-packages shellscape >>"$LOG" 2>&1 || true
+    sudo rm -rf /usr/lib/shellscape /usr/share/fish/vendor_completions.d/shellscape.fish
+    rm -rf "$HOME/.local/share/fonts/MaterialSymbols" "$HOME/.local/share/fonts/CaskaydiaCoveNerdFont" \
+           "$HOME/.mozilla/native-messaging-hosts/caelestiafox.json"
+    ok "Removed shellscape CLI + helpers"
+  fi
+  for d in "$HOME/.config/shellscape" "$HOME/.local/state/shellscape" "$HOME/.cache/shellscape"; do
+    [[ -d "$d" ]] && ask_yes_no "Delete $d (your scheme, wallpaper choice, shell.json)?" n && rm -rf "$d" && ok "Deleted $d"
+  done
+  DPKGS=(hyprland hypridle hyprpicker hyprpolkitagent xdg-desktop-portal-hyprland uwsm quickshell-git foot fish starship)
+  if ask_yes_no "dnf remove: ${DPKGS[*]} and disable their COPRs?" n; then
+    sudo dnf remove -y "${DPKGS[@]}" 2>&1 | tee -a "$LOG"
+    for c in sdegler/hyprland errornointernet/quickshell atim/starship; do sudo dnf copr disable -y "$c" >>"$LOG" 2>&1 || true; done
+    ok "Desktop packages removed"
   fi
   fc-cache -f >/dev/null 2>&1 || true
 fi
