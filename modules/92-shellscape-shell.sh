@@ -59,6 +59,8 @@ run_logged "Rebuilding font cache" fc-cache -f
 
 link_dotfile "$SHELL_SRC" "$HOME/.config/quickshell/shellscape"
 mkdir -p "$HOME/Pictures/Wallpapers"
+# Wallpapers shipped in the repo (wallpaper/) show up in the picker as a subfolder.
+[[ -d "$SHELLSCAPE_DIR/wallpaper" ]] && link_dotfile "$SHELLSCAPE_DIR/wallpaper" "$HOME/Pictures/Wallpapers/shellscape"
 # First run: start from Fedora's own wallpaper so the desktop (and its colour scheme) isn't blank.
 DEFAULT_WALL="$HOME/Pictures/Wallpapers/fedora-default.jpg"
 SRC_WALL=/usr/share/backgrounds/images/default-dark.jxl

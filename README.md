@@ -118,6 +118,7 @@ Shellscape/
 │   ├── hypr/           hyprland.lua, variables.lua (apps, gaps, blur, keyboard), hyprland/*.lua, hypridle.conf
 │   ├── uwsm/ foot/ fish/ starship.toml btop/ micro/ qt5ct/ qt6ct/ thunar/
 │   └── vscode/ firefox/ zen/ spicetify/ zed/     used by the optional modules
+├── wallpaper/          wallpapers, linked to ~/Pictures/Wallpapers/shellscape by the installer
 ├── vendor/             compressed copies: Nerd Font, Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts (~16 MB)
 ├── logs/               install logs, links.list, backups.list      (gitignored)
 └── build/              downloaded zips and cloned sources           (gitignored)
