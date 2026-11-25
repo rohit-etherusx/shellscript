@@ -20,7 +20,8 @@ if need_cmd app2unit; then
 else
   SRC="$BUILD_DIR/app2unit"
   git_clone https://github.com/Vladimir-csp/app2unit.git "$SRC"
-  run_logged "Installing ${YELLOW}app2unit${RESET}" sudo -n make -C "$SRC" PREFIX=/usr install \
+  # install-bin only: install-man needs scdoc, and the man page is not needed
+  run_logged "Installing ${YELLOW}app2unit${RESET}" sudo -n make -C "$SRC" install-bin \
     && need_cmd app2unit && ok "app2unit installed" || die "app2unit install failed"
 fi
 
