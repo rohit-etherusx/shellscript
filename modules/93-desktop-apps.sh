@@ -22,3 +22,14 @@ if need_cmd gsettings && ask_yes_no "Switch GTK apps to adw-gtk3-dark + Papirus-
   ok "GTK theme → adw-gtk3-dark, icons → Papirus-Dark"
 fi
 note "Default login shell stays zsh. Try fish any time with: fish  (and foot as a second terminal)."
+
+# GNOME Settings exits outside GNOME ("only supported under GNOME and Unity"). A local
+# desktop entry shadows the system one and starts it with a GNOME desktop name.
+GS="$HOME/.local/share/applications/org.gnome.Settings.desktop"
+if [[ -f /usr/share/applications/org.gnome.Settings.desktop ]] && ! grep -qs 'X-Shellscape' "$GS"; then
+  mkdir -p "$(dirname "$GS")"
+  sed -e '/^OnlyShowIn=/d' -e 's|^Exec=gnome-control-center|Exec=env XDG_CURRENT_DESKTOP=GNOME gnome-control-center|' \
+      -e 's|^\[Desktop Entry\]|[Desktop Entry]\nX-Shellscape=true|' \
+      /usr/share/applications/org.gnome.Settings.desktop > "$GS"
+  ok "GNOME Settings now opens under Hyprland"
+fi

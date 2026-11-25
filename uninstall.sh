@@ -39,8 +39,9 @@ for t in "${TARGETS[@]}"; do
   fi
 done
 
-DESK="$HOME/.local/share/applications/kitty.desktop"
-if grep -qs 'X-Shellscape' "$DESK"; then rm -f "$DESK"; ok "Removed $DESK"; fi
+for DESK in "$HOME/.local/share/applications/kitty.desktop" "$HOME/.local/share/applications/org.gnome.Settings.desktop"; do
+  if grep -qs 'X-Shellscape' "$DESK"; then rm -f "$DESK"; ok "Removed $DESK"; fi
+done
 
 section "Restoring backups"
 if [[ -f "$BACKUPS_LIST" ]]; then

@@ -24,6 +24,7 @@ end
 bind("Ctrl + Alt + Delete", global("session"))
 bind("Ctrl + Alt + C", global("clearNotifs"), locked)
 bind("Super + K", global("showall"))
+bind("Super + I", global("controlCenter"))  -- Shellscape settings: network, bluetooth, audio
 bind("Super + L", global("lock"))
 
 -- Restore lock (restart the shell, then lock)
