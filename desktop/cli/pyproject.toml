@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shellscape"
+requires-python = ">=3.13"
+dynamic = ["version"]
+dependencies = [
+    "pillow",
+    "materialyoucolor"
+]
+
+[project.scripts]
+shellscape = "shellscape:main"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.ruff]
+line-length = 120

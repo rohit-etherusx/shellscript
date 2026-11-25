@@ -9,6 +9,7 @@ set -euo pipefail
 SHELLSCAPE_DIR="${SHELLSCAPE_DIR:-$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)}"
 export SHELLSCAPE_DIR
 CONFIG_DIR="$SHELLSCAPE_DIR/config"
+DESKTOP_DIR="$SHELLSCAPE_DIR/desktop"   # Quickshell shell + Python CLI (imported by tools/absorb.sh)
 LOG_DIR="$SHELLSCAPE_DIR/logs"
 BUILD_DIR="$SHELLSCAPE_DIR/build"
 VENDOR_DIR="$SHELLSCAPE_DIR/vendor"   # offline copies of everything not in dnf (see vendor.sh)
@@ -107,6 +108,15 @@ install_pkgs() {
     error "Failed to install: ${failed[*]} (see $LOG)"
     return 1
   fi
+}
+
+# enable_copr owner/project  → `dnf copr enable` once (needs dnf5-plugins / dnf-plugins-core)
+enable_copr() {
+  if dnf copr list 2>/dev/null | grep -q "/$1\b" && ! dnf copr list 2>/dev/null | grep -q "/$1 (disabled)"; then
+    info "COPR $1 already enabled"; return 0
+  fi
+  run_logged "Enabling COPR ${YELLOW}$1${RESET}" sudo -n dnf copr enable -y "$1" \
+    && ok "Enabled COPR $1"
 }
 
 # ── Dotfiles ──────────────────────────────────────────────────────────────────

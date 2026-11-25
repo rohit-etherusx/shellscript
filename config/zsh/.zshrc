@@ -62,6 +62,10 @@ case "$SHELLSCAPE_BANNER" in
     fi ;;
 esac
 
+# Wallpaper colour scheme from the Shellscape desktop (written by `shellscape scheme`/`wallpaper`).
+# Absent until the desktop has run once, so kitty keeps its Catppuccin theme on plain KDE.
+[[ -t 1 && -r "$HOME/.local/state/shellscape/sequences.txt" ]] && command cat "$HOME/.local/state/shellscape/sequences.txt"
+
 # ── Tools ─────────────────────────────────────────────────────────────────────
 (( $+commands[fzf] ))    && source <(fzf --zsh)              # Ctrl-R history, Ctrl-T files, Alt-C cd
 (( $+commands[zoxide] )) && eval "$(zoxide init zsh)"        # z <dir>, zi (interactive)

@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
-#  Shellscape — Fedora terminal ricing installer
+#  Shellscape — Fedora terminal ricing + Hyprland desktop installer
 #
 #  Usage:  ./install.sh [options]
 #    -y, --yes          answer yes to every prompt (unattended)
 #        --skip NAME    skip a module (repeatable). NAME = "30-zsh", "zsh" or "30"
 #        --only NAME    run only these modules (repeatable)
+#        --with NAME    also run an optional module (vscode, browser, spotify, discord)
 #    -l, --list         list modules and exit
 #    -h, --help         this help
 #
 #  Modules live in modules/NN-name.sh and run in numeric order. Each one is
 #  idempotent: re-running install.sh is safe and only does what's missing.
+#  Modules marked "# optional" only run with --with/--only.
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -19,15 +21,16 @@ export SHELLSCAPE_DIR
 # shellcheck source=lib/common.sh
 source "$SHELLSCAPE_DIR/lib/common.sh"
 
-usage() { sed -n '3,14p' "$0" | sed -e 's/^#  \{0,1\}//' -e 's/^#$//'; }
+usage() { sed -n '3,16p' "$0" | sed -e 's/^#  \{0,1\}//' -e 's/^#$//'; }
 
 # ── Args ──────────────────────────────────────────────────────────────────────
-SKIP=(); ONLY=(); LIST=0
+SKIP=(); ONLY=(); WITH=(); LIST=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -y|--yes)  ASSUME_YES=1 ;;
     --skip)    [[ $# -ge 2 ]] || die "--skip needs a module name"; SKIP+=("$2"); shift ;;
     --only)    [[ $# -ge 2 ]] || die "--only needs a module name"; ONLY+=("$2"); shift ;;
+    --with)    [[ $# -ge 2 ]] || die "--with needs a module name"; WITH+=("$2"); shift ;;
     -l|--list) LIST=1 ;;
     -h|--help) usage; exit 0 ;;
     *) die "Unknown option: $1 (try --help)" ;;
@@ -41,6 +44,7 @@ mapfile -t MODULES < <(find "$SHELLSCAPE_DIR/modules" -maxdepth 1 -name '[0-9][0
 [[ ${#MODULES[@]} -gt 0 ]] || die "No modules found in $SHELLSCAPE_DIR/modules"
 
 module_desc() { sed -n 's/^# desc: //p' "$SHELLSCAPE_DIR/modules/$1" | head -1; }
+is_optional() { grep -qx '# optional' "$SHELLSCAPE_DIR/modules/$1"; }
 
 # matches <file> <name>: "30-zsh.sh" matches "30-zsh", "zsh" and "30"
 matches() {
@@ -50,7 +54,8 @@ matches() {
 selected() {
   local m=$1 n
   for n in "${SKIP[@]}";  do matches "$m" "$n" && return 1; done
-  [[ ${#ONLY[@]} -eq 0 ]] && return 0
+  for n in "${WITH[@]}";  do matches "$m" "$n" && return 0; done
+  [[ ${#ONLY[@]} -eq 0 ]] && ! is_optional "$m" && return 0
   for n in "${ONLY[@]}";  do matches "$m" "$n" && return 0; done
   return 1
 }
@@ -63,12 +68,12 @@ cat <<'BANNER'
   \__ \/ __ \/ _ \/ / / ___/ ___/ __ `/ __ \/ _ \
  ___/ / / / /  __/ / (__  ) /__/ /_/ / /_/ /  __/
 /____/_/ /_/\___/_/_/____/\___/\__,_/ .___/\___/
-                                   /_/   Fedora terminal ricing
+                                   /_/   Fedora terminal + Hyprland desktop
 BANNER
 printf '%s\n' "$RESET"
 
 if [[ $LIST == 1 ]]; then
-  for m in "${MODULES[@]}"; do printf '  %-18s %s\n' "${m%.sh}" "$(module_desc "$m")"; done
+  for m in "${MODULES[@]}"; do printf '  %-20s %s%s\n' "${m%.sh}" "$(is_optional "$m" && echo '(optional) ')" "$(module_desc "$m")"; done
   exit 0
 fi
 
@@ -77,8 +82,8 @@ info "Log file    : $LOG"
 echo
 echo "Modules to run:"
 for m in "${MODULES[@]}"; do
-  if selected "$m"; then printf '  %s %-18s %s\n' "${GREEN}✔${RESET}" "${m%.sh}" "$(module_desc "$m")"
-  else                   printf '  %s %-18s %s\n' "${YELLOW}–${RESET}" "${m%.sh}" "(skipped)"; fi
+  if selected "$m"; then printf '  %s %-20s %s\n' "${GREEN}✔${RESET}" "${m%.sh}" "$(module_desc "$m")"
+  else                   printf '  %s %-20s %s\n' "${YELLOW}–${RESET}" "${m%.sh}" "(skipped)"; fi
 done
 echo
 ask_yes_no "Start the installation?" y || { note "Aborted."; exit 0; }
@@ -131,6 +136,8 @@ ${BOLD}Next steps${RESET}
   3. Try:  ${CYAN}ls${RESET} (eza icons)  ${CYAN}Ctrl-R${RESET} (fzf history)  ${CYAN}z <dir>${RESET} (zoxide)
            ${CYAN}fastfetch${RESET}  ${CYAN}pokemon-colorscripts -r${RESET}  ${CYAN}tmux${RESET} (prefix is Ctrl-a; prefix+I installs plugins)
   4. Edit configs in ${CYAN}$SHELLSCAPE_DIR/config/${RESET} — they are symlinked, changes apply immediately.
-  5. Change the startup banner:  SHELLSCAPE_BANNER= fastfetch | pokemon | none  in config/zsh/.zshrc
+  5. Desktop: log out, pick ${CYAN}Hyprland (uwsm-managed)${RESET} at the login screen. Super = launcher,
+     Super+T terminal, Ctrl+Alt+Del session menu. Wallpapers go in ~/Pictures/Wallpapers.
+  6. Change the startup banner:  SHELLSCAPE_BANNER= fastfetch | pokemon | none  in config/zsh/.zshrc
   Undo everything with ${CYAN}./uninstall.sh${RESET}.
 WALK

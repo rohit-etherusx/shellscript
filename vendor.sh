@@ -60,6 +60,14 @@ SRC="$BUILD_DIR/pokemon-colorscripts"
 [[ -d "$SRC" ]] || git_clone https://gitlab.com/phoneybadger/pokemon-colorscripts.git "$SRC"
 pack pokemon-colorscripts "$SRC"
 
+section "Desktop"
+SRC="$BUILD_DIR/app2unit"
+[[ -d "$SRC" ]] || git_clone https://github.com/Vladimir-csp/app2unit.git "$SRC"
+pack app2unit "$SRC"
+download "https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.ttf" \
+  "$VENDOR_DIR/MaterialSymbolsRounded.ttf"
+note "CaskaydiaCove Nerd Font (~100 MB zip) is downloaded at install time, not vendored."
+
 section "Result"
 du -sh "$VENDOR_DIR"/* | sed "s|$SHELLSCAPE_DIR/||"
 echo
