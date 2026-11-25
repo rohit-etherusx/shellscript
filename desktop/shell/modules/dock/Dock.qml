@@ -60,7 +60,9 @@ Item {
         const apps = DesktopEntries.applications.values;
         return Config.dock.pinned.map(id => apps.find(e => e.id === id)).filter(e => e);
     }
-    readonly property list<var> unpinnedWindows: Hyprland.toplevels.values.filter(t => !pinnedEntries.some(e => matches(t, e)))
+    // Windows that close before Hyprland reports their class (e.g. test runners opening and
+    // closing windows in a loop) can linger in the toplevel list with no class; skip them.
+    readonly property list<var> unpinnedWindows: Hyprland.toplevels.values.filter(t => t.lastIpcObject?.class && !pinnedEntries.some(e => matches(t, e)))
 
     // No background of its own: the frame (Border.qml) paints this strip, so the bar is part of it.
     Item {
