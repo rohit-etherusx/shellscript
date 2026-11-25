@@ -10,6 +10,8 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
+import Quickshell.Services.UPower
+import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
 
@@ -51,7 +53,12 @@ StyledWindow {
         Config.save();
     }
 
-    readonly property list<var> pinnedEntries: Config.dock.pinned.map(id => DesktopEntries.byId(id)).filter(e => e)
+    // Looked up in applications.values (not byId) so the list re-evaluates once the
+    // desktop entries finish loading after shell start.
+    readonly property list<var> pinnedEntries: {
+        const apps = DesktopEntries.applications.values;
+        return Config.dock.pinned.map(id => apps.find(e => e.id === id)).filter(e => e);
+    }
     readonly property list<var> unpinnedWindows: Hyprland.toplevels.values.filter(t => !pinnedEntries.some(e => matches(t, e)))
 
     StyledRect {
@@ -161,6 +168,51 @@ StyledWindow {
                                 tray.modelData.display(root, root.mapFromItem(tray, 0, 0).x, 0);
                         }
                     }
+                }
+            }
+
+            // Status: network, bluetooth, battery (same logic as the Caelestia bar's StatusIcons)
+            MaterialIcon {
+                Layout.alignment: Qt.AlignVCenter
+                animate: true
+                text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
+                color: Colours.palette.m3secondary
+            }
+
+            MaterialIcon {
+                Layout.alignment: Qt.AlignVCenter
+                animate: true
+                text: !Bluetooth.defaultAdapter?.enabled ? "bluetooth_disabled" : Bluetooth.devices.values.some(d => d.connected) ? "bluetooth_connected" : "bluetooth"
+                color: Colours.palette.m3secondary
+            }
+
+            Row {
+                visible: UPower.displayDevice.isLaptopBattery
+                spacing: 2
+                Layout.alignment: Qt.AlignVCenter
+
+                MaterialIcon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    animate: true
+                    fill: 1
+                    text: {
+                        const perc = UPower.displayDevice.percentage;
+                        const charging = !UPower.onBattery;
+                        if (perc === 1)
+                            return charging ? "battery_charging_full" : "battery_full";
+                        let level = Math.floor(perc * 7);
+                        if (charging && (level === 4 || level === 1))
+                            level--;
+                        return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
+                    }
+                    color: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? Colours.palette.m3secondary : Colours.palette.m3error
+                }
+
+                StyledText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: `${Math.round(UPower.displayDevice.percentage * 100)}%`
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3secondary
                 }
             }
 
