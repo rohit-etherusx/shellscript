@@ -59,9 +59,9 @@ ColumnLayout {
             const mon = (Config.bar.workspaces.perMonitorWorkspaces ? Hyprland.monitorFor(screen) : Hyprland.focusedMonitor);
             const specialWs = mon?.lastIpcObject.specialWorkspace.name;
             if (specialWs?.length > 0)
-                Hyprland.dispatch(`togglespecialworkspace ${specialWs.slice(8)}`);
+                Hyprland.dispatch(`hl.dsp.workspace.toggle_special(${JSON.stringify(specialWs.slice(8))})`);
             else if (angleDelta.y < 0 || (Config.bar.workspaces.perMonitorWorkspaces ? mon.activeWorkspace?.id : Hyprland.activeWsId) > 1)
-                Hyprland.dispatch(`workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
+                Hyprland.dispatch(`hl.dsp.focus({ workspace = "r${angleDelta.y > 0 ? "-" : "+"}1" })`);
         } else if (y < screen.height / 2) {
             // Volume scroll on top half
             if (angleDelta.y > 0)

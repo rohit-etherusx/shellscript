@@ -338,7 +338,7 @@ All configuration options are in `~/.config/shellscape/shell.json`.
 
 ### My screen is flickering, help pls!
 
-Try disabling VRR in the hyprland config. You can do this by adding the following to `~/.config/shellscape/hypr-user.conf`:
+Try disabling VRR in the hyprland config. You can do this by adding the following to `~/.config/shellscape/hypr-user.lua`:
 
 ```conf
 misc {
@@ -348,7 +348,7 @@ misc {
 
 ### I want to make my own changes to the hyprland config!
 
-You can add your custom hyprland configs to `~/.config/shellscape/hypr-user.conf`.
+You can add your custom hyprland configs to `~/.config/shellscape/hypr-user.lua`.
 
 ### I want to make my own changes to other stuff!
 

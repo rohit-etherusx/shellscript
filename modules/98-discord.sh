@@ -3,7 +3,9 @@
 # optional
 source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
 
-install_pkgs flatpak sassc
+install_pkgs flatpak nodejs-npm
+# The Discord theme template needs Dart Sass (Fedora's sassc can't compile it).
+need_cmd sass || run_logged "Installing ${YELLOW}Dart Sass${RESET} (npm)" sudo -n npm install -g sass
 flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak info dev.vencord.Vesktop >/dev/null 2>&1 \
   || run_logged "Installing ${YELLOW}Vesktop${RESET} (Flatpak)" flatpak install --user -y flathub dev.vencord.Vesktop

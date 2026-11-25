@@ -357,9 +357,9 @@ Item {
 
             const ws = view.itemAt(event.x, event.y);
             if (ws?.modelData)
-                Hyprland.dispatch(`togglespecialworkspace ${ws.modelData.name.slice(8)}`);
+                Hyprland.dispatch(`hl.dsp.workspace.toggle_special(${JSON.stringify(ws.modelData.name.slice(8))})`);
             else
-                Hyprland.dispatch("togglespecialworkspace special");
+                Hyprland.dispatch('hl.dsp.workspace.toggle_special("special")');
         }
     }
 

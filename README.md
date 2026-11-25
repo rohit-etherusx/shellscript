@@ -115,7 +115,7 @@ Shellscape/
 │   ├── tmux/           tmux.conf  plugins/ (populated by TPM at install time)
 │   ├── eza/            theme.yml
 │   ├── bat/            config
-│   ├── hypr/           hyprland.conf, variables.conf (apps, gaps, blur, keys), hyprland/*.conf, hypridle
+│   ├── hypr/           hyprland.lua, variables.lua (apps, gaps, blur, keyboard), hyprland/*.lua, hypridle.conf
 │   ├── uwsm/ foot/ fish/ starship.toml btop/ micro/ qt5ct/ qt6ct/ thunar/
 │   └── vscode/ firefox/ zen/ spicetify/ zed/     used by the optional modules
 ├── vendor/             compressed copies: Nerd Font, Oh-My-Zsh, zsh plugins, TPM, pokemon-colorscripts (~16 MB)
@@ -143,9 +143,9 @@ to `<name>.bak.<timestamp>` and put back by `./uninstall.sh`.
 ~/.config/micro ~/.config/qt5ct ~/.config/qt6ct  → config/…
 ```
 
-Per-machine Hyprland overrides go in `~/.config/shellscape/hypr-vars.conf`
-(variables, e.g. `$browser`) and `~/.config/shellscape/hypr-user.conf` (any
-Hyprland config). Shell settings live in `~/.config/shellscape/shell.json`.
+Per-machine Hyprland overrides go in `~/.config/shellscape/hypr-vars.lua`
+(variables, e.g. `V.browser = "brave-browser"`, `V.kbLayout = "de"`) and
+`~/.config/shellscape/hypr-user.lua` (any Hyprland Lua config, e.g. `hl.monitor{…}`). Shell settings live in `~/.config/shellscape/shell.json`.
 None of these are inside the repo.
 
 Settings that are not files (Ptyxis font and palette, KDE default terminal, the
@@ -339,6 +339,13 @@ looks for by name.
 
 Fedora-specific changes on top of the import:
 
+- Hyprland 0.57 dropped the hyprlang `.conf` format and the old
+  `dispatch <name> <args>` syntax. The whole Hyprland config is ported to Lua
+  (`config/hypr/hyprland.lua` + `hyprland/*.lua`, checked with
+  `Hyprland --verify-config`); the shell's QML and the CLI send Lua dispatchers
+  (`hl.dsp.focus({ workspace = 3 })`); the CLI writes the colour scheme as
+  `scheme/current.lua` and reloads Hyprland; `wsaction.fish` is replaced by Lua
+  callbacks; the fork author's French keyboard layout is now `us` (`V.kbLayout`).
 - Hyprland, hypridle, hyprpicker, hyprpolkitagent, uwsm come from the
   `sdegler/hyprland` COPR (Fedora 45 dropped Hyprland); Quickshell from
   `errornointernet/quickshell` (`quickshell-git`, as the shell requires); starship from `atim/starship`.
@@ -348,8 +355,9 @@ Fedora-specific changes on top of the import:
 - Polkit agent → `hyprpolkitagent`; geoclue agent path → `/usr/libexec`;
   `sway-audio-idle-inhibit` (not packaged) dropped; cursor → `breeze_cursors`.
 - Default apps: kitty (terminal), VS Code, Thunar; the browser is auto-detected
-  into `hypr-vars.conf`. Removed the fork author's personal Flameshot/Zen bindings.
-- The CLI falls back to Fedora's `sassc` and skips Discord theming instead of
+  into `hypr-vars.lua`. Removed the fork author's personal Flameshot/Zen bindings.
+- The CLI skips Discord theming when Dart Sass is missing (`--with discord`
+  installs it) instead of
   crashing when no Sass compiler exists (upstream aborted the whole theme run,
   so GTK/Qt/btop never got recoloured).
 - zsh replays the scheme's terminal colours on start, so new kitty windows match
@@ -360,7 +368,7 @@ files, `Super+C` editor, `Super+1…0` workspaces, `Super+Alt+1…0` move window
 `Super+S` special workspace, `Super+V` clipboard, `Super+.` emoji,
 `Super+Shift+S` region screenshot, `Super+Alt+R` record, `Super+L` lock,
 `Ctrl+Alt+Del` session menu, `Ctrl+Super+Alt+R` restart the shell. The full
-list is `config/hypr/hyprland/keybinds.conf`.
+list is `config/hypr/hyprland/keybinds.lua`.
 
 ## Credits
 

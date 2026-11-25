@@ -3,7 +3,7 @@
 source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
 # Source: desktop/cli (rebranded caelestia-cli, see desktop/UPSTREAM).
 
-install_pkgs git gcc-c++ python3 python3-devel python3-pip python3-build python3-installer python3-hatchling python3-hatch-vcs sassc
+install_pkgs git gcc-c++ python3 python3-devel python3-pip python3-build python3-installer python3-hatchling python3-hatch-vcs
 
 CLI="$DESKTOP_DIR/cli"
 OUT="$BUILD_DIR/cli-dist"

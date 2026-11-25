@@ -33,7 +33,10 @@ copy "$CLI_SRC"   "$ROOT/desktop/cli"
 rm -f "$ROOT/desktop/cli/run.sh"   # Nix dev helper
 
 # 2. App configs → config/  (fastfetch is merged, not replaced: Shellscape keeps its own layouts)
-IMPORTED=(hypr foot fish uwsm btop qt5ct qt6ct micro zed thunar firefox spicetify vscode zen)
+# hypr is not re-imported: Shellscape's config/hypr is a Lua port (Hyprland 0.57 dropped hyprlang),
+# so upstream's .conf files would overwrite it with something Hyprland can't read.
+IMPORTED=(foot fish uwsm btop qt5ct qt6ct micro zed thunar firefox spicetify vscode zen)
+cp "$DOTS/hypr/hypridle.conf" "$ROOT/config/hypr/hypridle.conf"   # hypridle still reads hyprlang
 for d in "${IMPORTED[@]}"; do copy "$DOTS/$d" "$ROOT/config/$d"; done
 cp "$DOTS/starship.toml" "$ROOT/config/starship.toml"
 cp "$DOTS/fastfetch/saturn.txt" "$ROOT/config/fastfetch/saturn.txt"

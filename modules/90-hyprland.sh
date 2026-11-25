@@ -30,11 +30,14 @@ link_dotfile "$CONFIG_DIR/uwsm" "$HOME/.config/uwsm"
 link_dotfile "$CONFIG_DIR/thunar/uca.xml" "$HOME/.config/Thunar/uca.xml"
 link_dotfile "$CONFIG_DIR/thunar/thunar-volman.xml" "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar-volman.xml"
 
-# Per-machine overrides live outside the repo (sourced last by hyprland.conf).
-VARS="$HOME/.config/shellscape/hypr-vars.conf"
+# Per-machine overrides live outside the repo (loaded by hyprland.lua).
+# Hyprland 0.57+ only reads Lua (config/hypr/hyprland.lua); overrides are Lua too.
+VARS="$HOME/.config/shellscape/hypr-vars.lua"
 mkdir -p "$(dirname "$VARS")"; touch "$VARS"
-if ! grep -q '^\$browser' "$VARS"; then
+if ! grep -q '^V.browser' "$VARS"; then
   for b in firefox brave-browser google-chrome-stable chromium-browser; do
-    if need_cmd "$b"; then echo "\$browser = $b" >>"$VARS"; ok "Super+B → $b (edit $VARS to change)"; break; fi
+    if need_cmd "$b"; then echo "V.browser = \"$b\"" >>"$VARS"; ok "Super+B → $b (edit $VARS to change)"; break; fi
   done
 fi
+(cd /tmp && Hyprland --verify-config -c "$HOME/.config/hypr/hyprland.lua" 2>&1 | grep -q '^config ok') \
+  && ok "Hyprland config verified" || die "Hyprland rejected config/hypr/hyprland.lua (run: Hyprland --verify-config -c ~/.config/hypr/hyprland.lua)"

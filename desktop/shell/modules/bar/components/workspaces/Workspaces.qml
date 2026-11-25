@@ -92,9 +92,9 @@ StyledClippingRect {
             onClicked: event => {
                 const ws = layout.childAt(event.x, event.y).index + root.groupOffset + 1;
                 if (Hyprland.activeWsId !== ws)
-                    Hyprland.dispatch(`workspace ${ws}`);
+                    Hyprland.dispatch(`hl.dsp.focus({ workspace = ${ws} })`);
                 else
-                    Hyprland.dispatch("togglespecialworkspace special");
+                    Hyprland.dispatch('hl.dsp.workspace.toggle_special("special")');
             }
         }
 

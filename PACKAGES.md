@@ -16,10 +16,10 @@ human-readable inventory of what lands on your system and where it comes from.
 | 60-tmux | `tmux` | terminal multiplexer |
 | 70-pokemon | `python3` | runtime for pokemon-colorscripts |
 | 90-hyprland | `hyprland` `hypridle` `hyprpicker` `hyprpolkitagent` `xdg-desktop-portal-hyprland` `uwsm` *(COPR sdegler/hyprland)*, `xdg-desktop-portal-gtk` `cliphist` `wl-clipboard` `grim` `slurp` `swappy` `wf-recorder` `fuzzel` `ydotool` `fish` `jq` `socat` `inotify-tools` `libnotify` `trash-cli` `xdg-utils` `xdg-terminal-exec` `desktop-file-utils` `dash` `gnome-keyring` `gammastep` `geoclue2-demos` `bluez` `bluez-tools` `wireplumber` `pavucontrol` `qps` `brightnessctl` `ddcutil` `lm_sensors` `NetworkManager` `breeze-cursor-theme` `Thunar` `thunar-volman` `thunar-archive-plugin` `tumbler` | compositor, session, desktop utilities |
-| 91-shellscape-cli | `gcc-c++` `python3-devel` `python3-pip` `python3-build` `python3-installer` `python3-hatchling` `python3-hatch-vcs` `sassc` (+ pip: `pillow` `materialyoucolor`) | builds/installs the `shellscape` CLI |
+| 91-shellscape-cli | `gcc-c++` `python3-devel` `python3-pip` `python3-build` `python3-installer` `python3-hatchling` `python3-hatch-vcs` (+ pip: `pillow` `materialyoucolor`) | builds/installs the `shellscape` CLI |
 | 92-shellscape-shell | `quickshell-git` *(COPR errornointernet/quickshell)*, `qt6-qtdeclarative` `qt6-qtsvg` `qt6-qtimageformats` `cava` `aubio` `libqalculate` `pipewire-devel` `aubio-devel` `wayland-devel` `wayland-protocols-devel` `pkgconf-pkg-config` | the desktop shell and its two native helpers |
 | 93-desktop-apps | `foot` `fish` `starship` *(COPR atim/starship)* `btop` `nvtop` `htop` `micro` `qt5ct` `qt6ct` `adw-gtk3-theme` `papirus-icon-theme` | Caelestia's app stack, recoloured by the CLI |
-| 95–98 (optional) | `code` (Microsoft repo), `flatpak` + Flathub `com.spotify.Client` / `dev.vencord.Vesktop`, spicetify (install script) | `--with vscode|browser|spotify|discord` |
+| 95–98 (optional) | `code` (Microsoft repo), `flatpak` `nodejs-npm` (+ npm `sass` for Discord) + Flathub `com.spotify.Client` / `dev.vencord.Vesktop`, spicetify (install script) | `--with vscode|browser|spotify|discord` |
 
 Downloaded at install time for the desktop: app2unit (GitHub, also in `vendor/`),
 Material Symbols Rounded (Google, also in `vendor/`), CaskaydiaCove Nerd Font (Nerd Fonts release).

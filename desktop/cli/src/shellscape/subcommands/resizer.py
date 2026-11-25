@@ -162,8 +162,9 @@ class Command:
             move_x = monitor_x + monitor_width - scaled_width - offset
             move_y = monitor_y + monitor_height - scaled_height - offset
 
-            command1 = f"dispatch resizewindowpixel exact {scaled_width} {scaled_height},address:{address}"
-            command2 = f"dispatch movewindowpixel exact {int(move_x)} {int(move_y)},address:{address}"
+            window = hypr.lua(f"address:{address}")
+            command1 = f"dispatch hl.dsp.window.resize({{ x = {scaled_width}, y = {scaled_height}, window = {window} }})"
+            command2 = f"dispatch hl.dsp.window.move({{ x = {int(move_x)}, y = {int(move_y)}, window = {window} }})"
             hypr.batch(command1, command2)
 
             self._log_message(
@@ -179,16 +180,20 @@ class Command:
         if "float" in actions:
             window_info = self._get_window_info(window_id)
             if window_info and not window_info.get("floating", False):
-                dispatch_commands.append(f"dispatch togglefloating address:0x{window_id}")
+                dispatch_commands.append(
+                    f'dispatch hl.dsp.window.float({{ action = "toggle", window = "address:0x{window_id}" }})'
+                )
 
         if "pip" in actions:
             self._apply_pip_action(window_id)
             return True
 
-        dispatch_commands.append(f"dispatch resizewindowpixel exact {width} {height},address:0x{window_id}")
+        dispatch_commands.append(
+            f'dispatch hl.dsp.window.resize({{ x = {int(width)}, y = {int(height)}, window = "address:0x{window_id}" }})'
+        )
 
         if "center" in actions:
-            dispatch_commands.append("dispatch centerwindow")
+            dispatch_commands.append("dispatch hl.dsp.window.center()")
 
         try:
             hypr.batch(*dispatch_commands)
@@ -324,7 +329,7 @@ class Command:
 
             if not active_window_result.get("floating", False):
                 print(f"Window '{window_title}' is not floating. PIP only works on floating windows.")
-                print("Try making it floating first with: hyprctl dispatch togglefloating")
+                print("Try making it floating first with: hyprctl dispatch 'hl.dsp.window.float({ action = \"toggle\" })'")
                 return
 
             print(f"Applying PIP to active window: '{window_title}'")

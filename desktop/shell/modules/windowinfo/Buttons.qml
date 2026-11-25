@@ -87,7 +87,7 @@ ColumnLayout {
                     disabled: isCurrent
 
                     function onClicked(): void {
-                        Hyprland.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
+                        Hyprland.dispatch(`hl.dsp.window.move({ workspace = ${wsId}, window = "address:0x${root.client?.address}" })`);
                     }
                 }
             }
@@ -116,7 +116,7 @@ ColumnLayout {
             text: root.client?.lastIpcObject.floating ? qsTr("Tile") : qsTr("Float")
 
             function onClicked(): void {
-                Hyprland.dispatch(`togglefloating address:0x${root.client?.address}`);
+                Hyprland.dispatch(`hl.dsp.window.float({ action = "toggle", window = "address:0x${root.client?.address}" })`);
             }
         }
 
@@ -133,7 +133,7 @@ ColumnLayout {
                 text: root.client?.lastIpcObject.pinned ? qsTr("Unpin") : qsTr("Pin")
 
                 function onClicked(): void {
-                    Hyprland.dispatch(`pin address:0x${root.client?.address}`);
+                    Hyprland.dispatch(`hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })`);
                 }
             }
         }
@@ -144,7 +144,7 @@ ColumnLayout {
             text: qsTr("Kill")
 
             function onClicked(): void {
-                Hyprland.dispatch(`killwindow address:0x${root.client?.address}`);
+                Hyprland.dispatch(`hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })`);
             }
         }
     }

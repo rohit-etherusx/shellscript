@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -119,21 +120,32 @@ def apply_terms(sequences: str) -> None:
                 pass
 
 
-def apply_hypr(conf: str) -> None:
-    write_file(config_dir / "hypr/scheme/current.conf", conf)
+def gen_lua(colours: dict[str, str]) -> str:
+    return "return {\n" + "".join(f'    {name} = "{colour}",\n' for name, colour in colours.items()) + "}\n"
+
+
+def apply_hypr(colours: dict[str, str]) -> None:
+    # Hyprland 0.57+ reads Lua; hyprland.lua loads this table and is reloaded to pick it up.
+    write_file(config_dir / "hypr/scheme/current.lua", gen_lua(colours))
+    if os.getenv("HYPRLAND_INSTANCE_SIGNATURE") and shutil.which("hyprctl"):
+        subprocess.run(["hyprctl", "reload", "config-only"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def apply_discord(scss: str) -> None:
     import tempfile
 
-    # Fedora ships sassc (same -I interface); without either, skip Discord instead of aborting all theming.
-    sass = shutil.which("sass") or shutil.which("sassc")
+    # Needs Dart Sass (the template uses @use; Fedora's sassc can't compile it). Without it,
+    # skip Discord instead of aborting the whole theme run.
+    sass = shutil.which("sass")
     if not sass:
         return
 
     with tempfile.TemporaryDirectory("w") as tmp_dir:
         (Path(tmp_dir) / "_colours.scss").write_text(scss)
-        conf = subprocess.check_output([sass, "-I", tmp_dir, templates_dir / "discord.scss"], text=True)
+        try:
+            conf = subprocess.check_output([sass, "-I", tmp_dir, templates_dir / "discord.scss"], text=True)
+        except subprocess.CalledProcessError:
+            return
 
     for client in "Equicord", "Vencord", "BetterDiscord", "equibop", "vesktop", "legcord":
         write_file(config_dir / client / "themes/shellscape.theme.css", conf)
@@ -238,7 +250,7 @@ def apply_colours(colours: dict[str, str], mode: str) -> None:
     if check("enableTerm"):
         apply_terms(gen_sequences(colours))
     if check("enableHypr"):
-        apply_hypr(gen_conf(colours))
+        apply_hypr(colours)
     if check("enableDiscord"):
         apply_discord(gen_scss(colours))
     if check("enableSpicetify"):

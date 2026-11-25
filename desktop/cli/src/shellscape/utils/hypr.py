@@ -25,8 +25,16 @@ def message(msg: str, json: bool = True) -> str | dict[str, any]:
         return j.loads(resp) if json else resp
 
 
-def dispatch(dispatcher: str, *args: list[any]) -> bool:
-    return message(f"dispatch {dispatcher} {' '.join(map(str, args))}".rstrip(), json=False) == "ok"
+def lua(value: str) -> str:
+    """Quote a Python string as a Lua string literal."""
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n") + '"'
+
+
+def dispatch(dispatcher: str) -> bool:
+    """Run a Lua dispatcher, e.g. 'hl.dsp.workspace.toggle_special("music")'.
+
+    Hyprland 0.57 replaced the old `dispatch <name> <args>` syntax with Lua."""
+    return message(f"dispatch {dispatcher}", json=False) == "ok"
 
 
 def batch(*msgs: list[str], json: bool = False) -> str | dict[str, any]:
