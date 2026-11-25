@@ -112,7 +112,7 @@ install_pkgs() {
 
 # enable_copr owner/project  → `dnf copr enable` once (needs dnf5-plugins / dnf-plugins-core)
 enable_copr() {
-  if dnf copr list 2>/dev/null | grep -q "/$1\b" && ! dnf copr list 2>/dev/null | grep -q "/$1 (disabled)"; then
+  if dnf copr list 2>/dev/null | grep "/$1\b" >/dev/null && ! dnf copr list 2>/dev/null | grep "/$1 (disabled)" >/dev/null; then
     info "COPR $1 already enabled"; return 0
   fi
   run_logged "Enabling COPR ${YELLOW}$1${RESET}" sudo -n dnf copr enable -y "$1" \

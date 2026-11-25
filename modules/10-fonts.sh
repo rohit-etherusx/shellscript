@@ -22,7 +22,7 @@ NF_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${NF_NA
 NF_ZIP="$BUILD_DIR/${NF_NAME}.zip"
 NF_TXZ="$VENDOR_DIR/${NF_NAME}.tar.xz"
 
-if fc-list 2>/dev/null | grep -qi "JetBrainsMono Nerd Font"; then
+if fc-list 2>/dev/null | grep -i "JetBrainsMono Nerd Font" >/dev/null; then
   info "JetBrainsMono Nerd Font already installed. Skipping..."
 else
   mkdir -p "$NF_DIR"
@@ -36,7 +36,7 @@ else
       || die "Could not extract $NF_ZIP"
   fi
   run_logged "Rebuilding font cache" fc-cache -f
-  if fc-list | grep -qi "JetBrainsMono Nerd Font"; then
+  if fc-list | grep -i "JetBrainsMono Nerd Font" >/dev/null; then
     ok "JetBrainsMono Nerd Font installed → $NF_DIR"
   else
     die "Nerd Font install failed (fc-list doesn't see it)"

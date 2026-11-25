@@ -12,7 +12,7 @@ install_pkgs \
   fish jq socat inotify-tools libnotify trash-cli xdg-utils xdg-terminal-exec desktop-file-utils dash \
   gnome-keyring gammastep geoclue2-demos bluez bluez-tools wireplumber pavucontrol qps \
   brightnessctl ddcutil lm_sensors NetworkManager breeze-cursor-theme \
-  thunar thunar-volman thunar-archive-plugin tumbler
+  Thunar thunar-volman thunar-archive-plugin tumbler
 
 # app2unit — launches apps as systemd units (every Hyprland app keybind uses it). Not packaged.
 if need_cmd app2unit; then

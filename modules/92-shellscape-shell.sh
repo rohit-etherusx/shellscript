@@ -48,7 +48,7 @@ FDIR="$HOME/.local/share/fonts"
 # Only the Rounded family is referenced by the QML (upstream also fetched Outlined/Sharp).
 download "https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.ttf" \
   "$FDIR/MaterialSymbols/MaterialSymbolsRounded.ttf"
-if fc-list | grep -qi 'CaskaydiaCove Nerd Font'; then
+if fc-list | grep -i 'CaskaydiaCove Nerd Font' >/dev/null; then
   info "CaskaydiaCove Nerd Font already installed. Skipping..."
 else
   download "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip" "$BUILD_DIR/CascadiaCode.zip"
