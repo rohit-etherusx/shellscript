@@ -27,5 +27,5 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias cls='clear'
 alias ff='fastfetch'
-alias shellscape='"$SHELLSCAPE_DIR/install.sh"'
+alias shellscape-install='"$SHELLSCAPE_DIR/install.sh"'  # `shellscape` itself is the desktop CLI
 alias zshrc='${EDITOR:-nano} "$SHELLSCAPE_DIR/config/zsh/.zshrc"'
